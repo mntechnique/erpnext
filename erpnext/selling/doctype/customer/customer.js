@@ -33,7 +33,27 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		})
+		frm.set_query('customer_primary_address', function(doc) {
+			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_address",
+				filters: {
+					'customer': doc.name
+				}
+			}
+		})
 	},
+	customer_primary_address: function(frm){
+		if(!frm.doc.customer_primary_address){
+			frm.doc.primary_address = ""
+		}
+	},
+	customer_primary_contact: function(frm){
+		if(!frm.doc.customer_primary_contact){
+			frm.doc.mobile_no = "";
+			frm.doc.email_id = "";
+		}
+	},
+
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
