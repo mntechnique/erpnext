@@ -21,7 +21,7 @@ frappe.Leaderboard = Class.extend({
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
 		this.filters = {
-			"Customer": ["total_amount", "total_item_purchased"],
+			"Customer": ["base_total_amount","total_amount", "total_item_purchased"],
 			"Item": ["total_request", "total_purchase", "avg_price"],
 			"Supplier": ["annual_billing", "total_unpaid"],
 			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
