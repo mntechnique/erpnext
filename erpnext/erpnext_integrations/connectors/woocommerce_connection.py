@@ -43,40 +43,46 @@ def verify_request():
 
 @frappe.whitelist(allow_guest=True)
 def customer():
-	verify_request()
-	fd = json.loads(frappe.request.data)
-	print(fd)
-	event = frappe.get_request_header("X-Wc-Webhook-Event")
+	if frappe.request.data:
+		verify_request()
+		fd = json.loads(frappe.request.data)
+		print(fd)
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
 
-	if event == "updated":
-		try:
-			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+		if event == "updated":
+			try:
+				existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
 
-			edit_existing_customer(existing_customer,fd)
-			# print("THis Complete 1", existing_customer.customer_name)
-			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-			create_or_edit_address(existing_customer,fd,1)
+				edit_existing_customer(existing_customer,fd)
+				# print("THis Complete 1", existing_customer.customer_name)
+				existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+				create_or_edit_address(existing_customer,fd,1)
 
-			
-		except frappe.DoesNotExistError as e:
+				
+			except frappe.DoesNotExistError as e:
 
-			# new_customer = frappe.new_doc("Customer")
-			create_customer(fd)
-			new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-			create_or_edit_address(new_existing_customer,fd,0)
-			# print("THis Complete 2")
+				# new_customer = frappe.new_doc("Customer")
+				create_customer(fd)
+				new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+				create_or_edit_address(new_existing_customer,fd,0)
+				# print("THis Complete 2")
 
-		# except frappe.MandatoryError as e:
-		# 	new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-		# 	create_or_edit_address(new_existing_customer,fd,0)
-			
-		except Exception as e:
-			print("Error ",e)
+			# except frappe.MandatoryError as e:
+			# 	new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+			# 	create_or_edit_address(new_existing_customer,fd,0)
+				
+			except Exception as e:
+				print("Error ",e)
 
-	# elif event == "updated":
-	# 	pass
-	# elif event == "deleted":
-	# 	pass
+		# elif event == "updated":
+		# 	pass
+		elif event == "deleted":
+			# delete_customer = frappe.get_doc("Customer",{"woocommerce_id":fd.get("id")})
+			# delete = frappe.delete_doc("Customer",delete_customer.name)
+			# frappe.db.commit()
+			pass
+		# else:
+		# 	pass
 
 
 
@@ -255,24 +261,28 @@ def create_or_edit_address(customer,fd,customer_status):
 	if customer_status == 1:
 		make_address = frappe.get_doc("Address",{"woocommerce_id": fd.get("id")})
 		new_address_title = customer.customer_name+"-billing"
+		make_address.address_title = customer.customer_name
+		make_address.save()
 		frappe.rename_doc("Address",make_address.name,new_address_title)
-		# make_address.address_title = customer.customer_name
 
+		# fetch renamed address again
+		make_address = frappe.get_doc("Address",{"woocommerce_id": fd.get("id")})
 
 	raw_address = fd.get("billing")
 	print("This is address")
-	print(raw_address)
+	print(raw_address.get("address_1"))
 
-	make_address.address_line1 = "Not Provided" if not fd.get("address_1") else fd.get("address_1")
-	make_address.address_line2 = "Not Provided" if not fd.get("address_2") else fd.get("address_2")
-	make_address.city = "Not Provided" if not fd.get("city") else fd.get("city")
+	make_address.address_line1 = raw_address.get("address_1", "Not Provided")
+	make_address.address_line2 = raw_address.get("address_2", "Not Provided")
+	make_address.city = raw_address.get("city", "Not Provided")
 	make_address.woocommerce_id = str(fd.get("id"))
 	make_address.address_type = "Shipping"
-	make_address.country = fd.get("country")
-	make_address.state = fd.get("state")
-	make_address.pincode = str(fd.get("postcode"))
-	make_address.phone = str(fd.get("phone"))
-	make_address.email = str(fd.get("email"))
+	make_address.country = frappe.get_value("Country", filters={"code":raw_address.get("country", "IN").lower()})
+	print(make_address.country*1000)
+	make_address.state = raw_address.get("state")
+	make_address.pincode = str(raw_address.get("postcode"))
+	make_address.phone = str(raw_address.get("phone"))
+	make_address.email = str(raw_address.get("email"))
 
 	make_address.append("links", {
 		"link_doctype": "Customer",
