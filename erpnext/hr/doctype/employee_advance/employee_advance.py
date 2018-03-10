@@ -35,6 +35,10 @@ class EmployeeAdvance(Document):
 		elif self.docstatus == 2:
 			self.status = "Cancelled"
 
+	def get_due_advance_amount(self):
+		employee_due_amount = frappe.get_all("Employee Advance",filters={"employee":self.employee,"docstatus":1,"posting_date":("<=",self.posting_date)},fields=["advance_amount","paid_amount"])		
+		return sum([(emp.advance_amount -emp.paid_amount) for emp in employee_due_amount])
+
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
 			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
