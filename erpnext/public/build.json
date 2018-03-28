@@ -38,7 +38,8 @@
         "public/js/education/student_button.html",
         "public/js/education/assessment_result_tool.html",
         "public/js/hub/hub_factory.js", 
-        "public/js/integrations/call_popup.html"
+        "public/js/integrations/call_popup.html",
+        "public/js/telephony/telephony_console.html"
     ],
     "js/item-dashboard.min.js": [
         "stock/dashboard/item_dashboard.html",
