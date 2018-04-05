@@ -33,6 +33,8 @@ def order():
 
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 
+	print(fd)
+
 	if event == "created":
 
 		raw_billing_data = fd.get("billing")
@@ -57,6 +59,8 @@ def order():
 			else:
 				link_item(item,0)
 
+		ordered_items_tax = fd.get("tax_lines")
+		creating_custom_tax_accounts(ordered_items_tax)
 
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
 
@@ -82,7 +86,7 @@ def order():
 			woocomm_item_id = item.get("product_id")
 			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
 
-			ordered_items_tax = item.get("total_tax")
+			# ordered_items_tax = item.get("total_tax")
 
 			default_set_company = frappe.get_doc("Global Defaults")
 			company = default_set_company.default_company
@@ -100,14 +104,30 @@ def order():
 				"warehouse": "Stores" + " - " + company_abbr
 				})
 
-			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
+			# add_product_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax")
+
+		# ordered_items_tax = fd.get("tax_lines")
+		# item_taxes(new_sales_order,ordered_items_tax)
+
+		for item_tax in ordered_items_tax:
+			label = item_tax.get("label")
+			price = item_tax.get("tax_total")
+			account_name = woocommerce_settings.tax_account +" "+label+" - "+comp_abbr
+
+			new_sales_order.append("taxes",{
+								"charge_type":"Actual",
+								"account_head": account_name,
+								"tax_amount": price,
+								"description": label
+								})
+
 
 		# shipping_details = fd.get("shipping_lines") # used for detailed order
 		shipping_total = fd.get("shipping_total")
 		shipping_tax = fd.get("shipping_tax")
 
-		add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
-		add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
+		add_tax_details(new_sales_order,shipping_tax,"Shipping Tax")
+		add_tax_details(new_sales_order,shipping_total,"Shipping Total")
 
 		new_sales_order.submit()
 
@@ -186,17 +206,17 @@ def link_item(item_data,item_status):
 	item.save()
 	frappe.db.commit()
 
-def add_tax_details(sales_order,price,desc,status):
+def add_tax_details(sales_order,price,desc):
 
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 
-	if status == 0:
-		# Product taxes
-		account_head_type = woocommerce_settings.tax_account
+	# # if status == 0:
+	# # 	# Product taxes
+	# # 	account_head_type = woocommerce_settings.tax_account
 
-	if status == 1:
-		# Shipping taxes
-		account_head_type = woocommerce_settings.f_n_f_account
+	# if status == 1:
+	# 	# Shipping taxes
+	account_head_type = woocommerce_settings.f_n_f_account
 
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
@@ -204,3 +224,87 @@ def add_tax_details(sales_order,price,desc,status):
 							"tax_amount": price,
 							"description": desc
 							})
+
+# def create_new_account_for_company_expenses():
+# 	default_set_company = frappe.get_doc("Global Defaults")
+
+# 		new_tax_account = frappe_new_doc("Account")
+# 		new_tax_account.account_name = default_set_company.default_company
+# 		new_tax_account.is_group = 1
+# 		new_tax_account.root_type = "Expense"
+# 		new_tax_account.account_type = "tax"
+# 		new_tax_account.save()
+
+# def item_taxes(sales_order,ordered_items_tax):
+
+# 	# woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+
+# 	# selected_account_name = woocommerce_settings.tax_account
+
+# 	# search_account = frappe.get_doc("Account",{"name":selected_account_name})
+# 	# selected_account_root_type = search_account.root_type
+# 	# selected_account_currency = search_account.account_currency
+# 	# selected_account_type = search_account.account_type
+
+# 	# default_set_company = frappe.get_doc("Global Defaults")
+# 	# company = frappe.get_doc("Company",{"company_name":default_set_company.default_company})
+# 	# comp_abbr = company.abbr
+
+# 	# for item_tax in ordered_items_tax:
+# 	# 	label = item_tax.get("label")
+# 	# 	tax = item_tax.get("tax_total")
+# 	# 	check_account_name = woocommerce_settings.tax_account +" "+label+" "+comp_abbr
+
+# 	# 	if not frappe.get_value("Account",{"name":account_name}):
+# 	# 		new_tax_account = frappe_new_doc("Account")
+# 	# 		new_tax_account.account_name = check_account_name
+# 	# 		new_tax_account.root_type = selected_account_root_type
+# 	# 		new_tax_account.account_currency = selected_account_currency
+# 	# 		new_tax_account.account_type = selected_account_type
+# 	# 		new_tax_account.save()
+# 	# 	else:
+
+# 	for item_tax in ordered_items_tax:
+# 		label = item_tax.get("label")
+# 		price = item_tax.get("tax_total")
+
+# 		sales_order.append("taxes",{
+# 							"charge_type":"Actual",
+# 							"account_head": label,
+# 							"tax_amount": price,
+# 							"description": desc
+# 							})
+
+
+def creating_custom_tax_accounts(ordered_items_tax):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+	print("Making Tax account")
+
+	selected_account_name = woocommerce_settings.tax_account
+
+	search_account = frappe.get_doc("Account",{"name":selected_account_name})
+	selected_account_root_type = search_account.root_type
+	selected_account_currency = search_account.account_currency
+	selected_account_type = search_account.account_type
+
+	default_set_company = frappe.get_doc("Global Defaults")
+	company = frappe.get_doc("Company",{"company_name":default_set_company.default_company})
+	comp_abbr = company.abbr
+
+	for tax in ordered_items_tax:
+		label = item_tax.get("label")
+		check_account_name = woocommerce_settings.tax_account +" "+label+" - "+comp_abbr
+
+		try:
+			if not frappe.get_value("Account",{"name":check_account_name}):
+				new_tax_account = frappe.new_doc("Account")
+				new_tax_account.account_name = check_account_name
+				new_tax_account.root_type = selected_account_root_type
+				new_tax_account.account_currency = selected_account_currency
+				new_tax_account.account_type = selected_account_type
+				new_tax_account.save()	
+		except Exception as e:
+			print (e)
+
+
+	frappe.db.commit()

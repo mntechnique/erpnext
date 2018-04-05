@@ -9,7 +9,7 @@ frappe.ui.form.on('Woocommerce Settings', {
 			return {
 				"filters": {
 					"company": frappe.defaults.get_default("company"),
-					"is_group": 0
+					"is_group": 1
 				}
 			};
 		});
