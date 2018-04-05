@@ -129,7 +129,6 @@ frappe.CallCenterConsole = Class.extend({
 						console.log("R",r.message)
 						content = frappe.render_template("telephony_console", {"info": r.message || null});
 						me.page.main.append(content);
-						
 						if (r.message.title == "Lead") {
 							me.page.main.find("#lead_to_customer").on("click", function() {
 								me.create_customer(r.message);
@@ -151,7 +150,7 @@ frappe.CallCenterConsole = Class.extend({
 							me.page.main.find("#new_caller_issue").on("click", function() {
 								me.create_issue(r.message);
 							});						
-						}							
+						}
 					}
 				}
 			});
