@@ -15,6 +15,8 @@ def verify_request():
 		).digest()
 	)
 
+	print("This is sig made", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
+
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
@@ -110,16 +112,26 @@ def order():
 		# item_taxes(new_sales_order,ordered_items_tax)
 
 		for item_tax in ordered_items_tax:
-			label = item_tax.get("label")
-			price = item_tax.get("tax_total")
-			account_name = woocommerce_settings.tax_account +" "+label+" - "+comp_abbr
+			print("Adding tax into Sales Order")
+			try:
+				woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 
-			new_sales_order.append("taxes",{
-								"charge_type":"Actual",
-								"account_head": account_name,
-								"tax_amount": price,
-								"description": label
-								})
+				default_set_company = frappe.get_doc("Global Defaults")
+				company = frappe.get_doc("Company",{"company_name":default_set_company.default_company})
+				comp_abbr = company.abbr
+
+				label = item_tax.get("label")
+				price = item_tax.get("tax_total")
+				account_name = woocommerce_settings.tax_account +" "+label+" - "+comp_abbr
+				new_sales_order.append("taxes",{
+									"charge_type":"Actual",
+									"account_head": account_name,
+									"tax_amount": price,
+									"description": label
+									})
+				
+			except Exception as e:
+				print (e)
 
 
 		# shipping_details = fd.get("shipping_lines") # used for detailed order
@@ -292,19 +304,17 @@ def creating_custom_tax_accounts(ordered_items_tax):
 	comp_abbr = company.abbr
 
 	for tax in ordered_items_tax:
-		label = item_tax.get("label")
+		label = tax.get("label")
 		check_account_name = woocommerce_settings.tax_account +" "+label+" - "+comp_abbr
 
-		try:
-			if not frappe.get_value("Account",{"name":check_account_name}):
-				new_tax_account = frappe.new_doc("Account")
-				new_tax_account.account_name = check_account_name
-				new_tax_account.root_type = selected_account_root_type
-				new_tax_account.account_currency = selected_account_currency
-				new_tax_account.account_type = selected_account_type
-				new_tax_account.save()	
-		except Exception as e:
-			print (e)
-
+		if not frappe.get_value("Account",{"name":check_account_name}):
+			acc_name =  woocommerce_settings.tax_account +" "+label
+			new_tax_account = frappe.new_doc("Account")
+			new_tax_account.account_name = acc_name
+			new_tax_account.root_type = selected_account_root_type
+			new_tax_account.account_currency = selected_account_currency
+			new_tax_account.account_type = selected_account_type
+			new_tax_account.parent_account = selected_account_name
+			new_tax_account.save()
 
 	frappe.db.commit()
