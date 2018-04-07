@@ -35,7 +35,7 @@ def order():
 
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 
-	print(fd)
+	print(frappe.request.data)
 
 	if event == "created":
 

@@ -35,9 +35,9 @@ class TestWoocommerce(unittest.TestCase):
 	def test_woocommerce_request(self):
 		r = emulate_request()
 		self.assertTrue(r.status_code == 200)
-		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}))
-		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 56}))
-		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
+		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"newcaptain@gmail.com"}))
+		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 374}))
+		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":702}))
 
 		# cancel & delete order
 		cancel_and_delete_order()
@@ -45,7 +45,7 @@ class TestWoocommerce(unittest.TestCase):
 		# Emulate Request when Customer, Address, Item data exists
 		r = emulate_request()
 		self.assertTrue(r.status_code == 200)
-		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
+		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":702}))
 
 	def tearDown(self):
 		default = frappe.get_doc("Global Defaults")
@@ -59,10 +59,10 @@ def emulate_request():
 	# Emulate Woocommerce Request
 	headers = {
 		"X-Wc-Webhook-Event":"created",
-		"X-Wc-Webhook-Signature":"A2//zEZfIeNgY9kOTfp5zXWHH2yxivqV1HMpWNNgJ+o="
+		"X-Wc-Webhook-Signature":"eBrvZ2+DR3S2hhEsxMoB4jCItmVykxZ/MHj/2qIJbrk="
 	}
 	# Emulate Request Data
-	data = """{u'date_completed_gmt': None, u'date_modified_gmt': u'2018-04-07T10:39:33', u'payment_method': u'cod', u'discount_tax': u'0.00', u'number': u'685', u'currency': u'INR', u'cart_hash': u'612642db682c427f58b298aef373ec5b', u'total': u'911.00', u'shipping_tax': u'12.00', u'id': 685, u'customer_ip_address': u'103.54.96.14', u'prices_include_tax': True, u'coupon_lines': [], u'billing': {u'city': u'Thane', u'first_name': u'New', u'last_name': u'Captain', u'country': u'IN', u'company': u'', u'phone': u'12345789123', u'state': u'MH', u'address_1': u'Mumbai', u'address_2': u'Dadar', u'email': u'newcaptain@gmail.com', u'postcode': u'123'}, u'customer_user_agent': u'mozilla/5.0 (x11; linux x86_64) applewebkit/537.36 (khtml, like gecko) chrome/65.0.3325.146 safari/537.36', u'date_paid_gmt': None, u'parent_id': 0, u'created_via': u'checkout', u'version': u'3.3.4', u'fee_lines': [], u'customer_id': 21, u'transaction_id': u'', u'status': u'processing', u'total_tax': u'97.60', u'customer_note': u'', u'tax_lines': [{u'tax_total': u'42.80', u'shipping_tax_total': u'6.00', u'label': u'SGST', u'meta_data': [], u'compound': False, u'rate_id': 1, u'rate_code': u'IN-MH-SGST-1', u'id': 249}, {u'tax_total': u'42.80', u'shipping_tax_total': u'6.00', u'label': u'CGST', u'meta_data': [], u'compound': False, u'rate_id': 3, u'rate_code': u'IN-MH-CGST-2', u'id': 250}], u'shipping_total': u'100.00', u'payment_method_title': u'Cash on delivery', u'meta_data': [], u'discount_total': u'0.00', u'order_key': u'wc_order_5ac89fe599930', u'line_items': [{u'sku': u'Green Color Cotton Leggings', u'total_tax': u'32.14', u'product_id': 281, u'price': 267.857143, u'tax_class': u'', u'variation_id': 289, u'taxes': [{u'total': u'16.071429', u'subtotal': u'16.071429', u'id': 1}, {u'total': u'16.071429', u'subtotal': u'16.071429', u'id': 3}], u'name': u'Cotton Leggings - L, GREEN', u'meta_data': [{u'value': u'L', u'id': 1746, u'key': u'size'}, {u'value': u'GREEN', u'id': 1747, u'key': u'color'}], u'subtotal_tax': u'32.14', u'total': u'267.86', u'subtotal': u'267.86', u'id': 246, u'quantity': 1}, {u'sku': u'PT-0001', u'total_tax': u'53.46', u'product_id': 374, u'price': 445.535714, u'tax_class': u'', u'variation_id': 0, u'taxes': [{u'total': u'26.732143', u'subtotal': u'26.732143', u'id': 1}, {u'total': u'26.732143', u'subtotal': u'26.732143', u'id': 3}], u'name': u'Moon phases T shirt | Black colour', u'meta_data': [], u'subtotal_tax': u'53.46', u'total': u'445.54', u'subtotal': u'445.54', u'id': 247, u'quantity': 1}], u'shipping_lines': [{u'total_tax': u'12.00', u'method_id': u'flat_rate:1', u'method_title': u'Flat rate', u'taxes': [{u'total': u'6', u'subtotal': u'', u'id': 1}, {u'total': u'6', u'subtotal': u'', u'id': 3}], u'meta_data': [{u'value': u'Moon phases T shirt | Black colour &times; 1', u'id': 1761, u'key': u'Items'}], u'total': u'100.00', u'id': 248}], u'date_completed': None, u'refunds': [], u'date_modified': u'2018-04-07T10:39:33', u'date_created_gmt': u'2018-04-07T10:39:33', u'shipping': {u'city': u'Thane', u'first_name': u'New', u'last_name': u'Captain', u'country': u'IN', u'company': u'', u'state': u'MH', u'address_1': u'Mumbai', u'address_2': u'Dadar', u'postcode': u'123'}, u'date_paid': None, u'date_created': u'2018-04-07T10:39:33', u'cart_tax': u'85.60'}"""
+	data = """{"id":702,"parent_id":0,"number":"702","order_key":"wc_order_5ac8b51aa2518","created_via":"checkout","version":"3.3.4","status":"processing","currency":"INR","date_created":"2018-04-07T12:10:02","date_created_gmt":"2018-04-07T12:10:02","date_modified":"2018-04-07T12:10:02","date_modified_gmt":"2018-04-07T12:10:02","discount_total":"0.00","discount_tax":"0.00","shipping_total":"100.00","shipping_tax":"12.00","cart_tax":"53.46","total":"611.00","total_tax":"65.46","prices_include_tax":true,"customer_id":21,"customer_ip_address":"103.54.96.14","customer_user_agent":"mozilla\/5.0 (x11; linux x86_64) applewebkit\/537.36 (khtml, like gecko) chrome\/65.0.3325.146 safari\/537.36","customer_note":"","billing":{"first_name":"New","last_name":"Captain","company":"","address_1":"Mumbai","address_2":"Dadar","city":"Thane","state":"MH","postcode":"123","country":"IN","email":"newcaptain@gmail.com","phone":"12345789123"},"shipping":{"first_name":"New","last_name":"Captain","company":"","address_1":"Mumbai","address_2":"Dadar","city":"Thane","state":"MH","postcode":"123","country":"IN"},"payment_method":"cod","payment_method_title":"Cash on delivery","transaction_id":"","date_paid":null,"date_paid_gmt":null,"date_completed":null,"date_completed_gmt":null,"cart_hash":"372f905c47a84bc1d08f20e59f4a449d","meta_data":[],"line_items":[{"id":266,"name":"Moon phases T shirt | Black colour","product_id":374,"variation_id":0,"quantity":1,"tax_class":"","subtotal":"445.54","subtotal_tax":"53.46","total":"445.54","total_tax":"53.46","taxes":[{"id":1,"total":"26.732143","subtotal":"26.732143"},{"id":3,"total":"26.732143","subtotal":"26.732143"}],"meta_data":[],"sku":"PT-0001","price":445.535714}],"tax_lines":[{"id":268,"rate_code":"IN-MH-SGST-1","rate_id":1,"label":"SGST","compound":false,"tax_total":"26.73","shipping_tax_total":"6.00","meta_data":[]},{"id":269,"rate_code":"IN-MH-CGST-2","rate_id":3,"label":"CGST","compound":false,"tax_total":"26.73","shipping_tax_total":"6.00","meta_data":[]}],"shipping_lines":[{"id":267,"method_title":"Flat rate","method_id":"flat_rate:1","total":"100.00","total_tax":"12.00","taxes":[{"id":1,"total":"6","subtotal":""},{"id":3,"total":"6","subtotal":""}],"meta_data":[{"id":1878,"key":"Items","value":"Moon phases T shirt | Black colour &times; 1"}]}],"fee_lines":[],"coupon_lines":[],"refunds":[]}"""
 
 	# Build URL
 	port = frappe.get_site_config().webserver_port or '8000'
@@ -82,7 +82,7 @@ def emulate_request():
 def cancel_and_delete_order():
 	# cancel & delete order
 	try:
-		so = frappe.get_doc("Sales Order",{"woocommerce_id":74})
+		so = frappe.get_doc("Sales Order",{"woocommerce_id":702})
 		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
 			so.cancel()
 			so.delete()
