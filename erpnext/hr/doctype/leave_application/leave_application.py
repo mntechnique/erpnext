@@ -33,7 +33,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
-
+		self.get_leave_summary()
 		if hasattr(self, "workflow_state") and self.workflow_state == "Rejected":
 			# notify leave applier about rejection
 			self.notify_employee()
@@ -279,6 +279,12 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				# Arrey!
 				pass
+
+	def get_leave_summary(self):
+		data = ""
+		self.pending_leaves = frappe.render_template("public/js/templates/leave_summary.html")
+
+		# 	leave type,allotted,used,pending approval,available
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
