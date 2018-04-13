@@ -154,10 +154,10 @@ def capture_call_details(*args, **kwargs):
 			credentials = frappe.get_doc("Exotel Settings")
 			content = args or kwargs
 
-			response = requests.get('https://api.exotel.com/v1/Accounts/{sid}/Calls/{callsid}.json'.format(sid = credentials.exotel_sid,callsid = content.get("CallSid")),\
-				auth=(credentials.exotel_sid,credentials.exotel_token))
+			# response = requests.get('https://api.exotel.com/v1/Accounts/{sid}/Calls/{callsid}.json'.format(sid = credentials.exotel_sid,callsid = content.get("CallSid")),\
+			# 	auth=(credentials.exotel_sid,credentials.exotel_token))
 
-			content = response.json()["Call"]
+			# content = response.json()["Call"]
 
 			if response.status_code == 200:
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
@@ -186,7 +186,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 	try:
 		credentials = frappe.get_doc("Exotel Settings")	
 		
-		endpoint = "/api/method/frappe.integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
+		endpoint = "/api/method/erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
 		url = frappe.request.url
 
 		server_url = '{uri.scheme}://{uri.netloc}'.format(
@@ -200,7 +200,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			'From': frappe.get_doc("User",frappe.session.user).phone or frappe.get_doc("User",frappe.session.user).mobile_no,
 			'To': To,
 			'CallerId': CallerId,
-			'StatusCallback': status_callback_url
+			'StatusCallback':"http://159.65.150.239/api/method/erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
 		})
 
 		if response.status_code == 200:
