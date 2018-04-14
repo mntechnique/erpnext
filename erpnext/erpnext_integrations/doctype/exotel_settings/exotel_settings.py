@@ -15,14 +15,14 @@ class ExotelSettings(Document):
 		self.create_delete_custom_fields()
 
 	def validate_credentials(self):
-		if self.enable:
+		if self.enable_integration:
 			response = requests.get('https://api.exotel.com/v1/Accounts/{sid}'.format(sid = self.exotel_sid),
 				auth=(self.exotel_sid, self.exotel_token))
 			if(response.status_code != 200):
 				frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
 
 	def create_delete_custom_fields(self):
-		if self.enable:
+		if self.enable_integration:
 			# create
 			create_custom_fields = False
 			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url"]
