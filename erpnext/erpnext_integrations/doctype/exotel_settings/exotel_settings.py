@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.model.document import Document
+from erpnext.crm.doctype.crm_settings.crm_settings import make_popup,render_popup,display_popup
 from six.moves.urllib.parse import urlparse
 import requests
 
@@ -37,12 +38,12 @@ class ExotelSettings(Document):
 				types = ["Section Break","Read Only","Read Only","Long Text"]
 
 				insert_after = ["field_request","call_details","exophone","sid"]
-				for i in zip(labels,types):
+				for index,i in enumerate(zip(labels,types)):
 					custom = frappe.new_doc("Custom Field")
 					custom.dt = "Communication"
 					custom.label = i[0]
 					custom.fieldtype = i[1]
-					# need to add insert_after
+					custom.insert_after = insert_after[index]
 					custom.read_only = 1
 					custom.save()
 
@@ -54,65 +55,6 @@ class ExotelSettings(Document):
 
 		frappe.db.commit()
 
-def make_popup(caller_no):
-	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no}, ignore_permissions=True)
-
-	if len(contact_lookup) > 0:
-		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
-		if(contact_doc.get_link_for('Customer')):
-			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
-			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
-			popup_data = {
-				"title": "Customer", 
-				"number": caller_no,
-				"name": customer_full_name,
-				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-			}
-
-			popup_html = render_popup(popup_data)
-			return popup_html
-
-		elif(contact_doc.get_link_for('Lead')):
-			lead_full_name = frappe.get_doc("Lead",contact_doc.get_link_for('Lead')).lead_name
-			popup_data = {
-				"title": "Lead", 
-				"number": caller_no,
-				"name": lead_full_name,
-				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-			}
-			popup_html = render_popup(popup_data)
-			return popup_html
-
-	else:
-		popup_data = {
-			"title": "Unknown Caller",
-			"number": caller_no,
-			"name": "Unknown",
-			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-		}
-		popup_html = render_popup(popup_data)
-		return popup_html
-
-def render_popup(popup_data):
-	html = frappe.render_template("frappe/public/js/integrations/call_popup.html", popup_data)
-	return html
-
-def display_popup():
-	# agent_no = popup_json.get("destination")
-
-	try:
-		popup_html = make_popup(caller_no)
-		# if agent_id:	
-		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
-		# else:
-		users = frappe.get_all("Has Role", filters={"parenttype":"User","role":"Support Team"}, fields=["parent"])
-		agents = [user.get("parent") for user in users]
-		for agent in agents:
-			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)	
-
-	except Exception as e:
-		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
-
 @frappe.whitelist(allow_guest=True)
 def handle_incoming_call(*args, **kwargs):
 	""" Handles incoming calls in telephony service. """
@@ -121,7 +63,7 @@ def handle_incoming_call(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
-			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
+			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"))
 
 			comm = frappe.new_doc("Communication")
