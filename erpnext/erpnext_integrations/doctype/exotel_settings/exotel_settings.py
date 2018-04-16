@@ -47,7 +47,7 @@ class ExotelSettings(Document):
 					custom.read_only = 1
 					custom.save()
 
-		elif not self.enable:
+		elif not self.enable_integration:
 			# delete
 			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url"]
 			for name in names:
