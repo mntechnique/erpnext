@@ -63,8 +63,6 @@ def handle_incoming_call(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
-			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"))
 
 			comm = frappe.new_doc("Communication")
 			comm.subject = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
@@ -83,6 +81,9 @@ def handle_incoming_call(*args, **kwargs):
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 
+			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
+				display_popup(content.get("CallFrom"))
+			frappe.publish_realtime('eval_js', 'get_info')	
 			return comm
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")
@@ -101,15 +102,15 @@ def capture_call_details(*args, **kwargs):
 
 			# content = response.json()["Call"]
 
-			if response.status_code == 200:
-				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
-				comm = frappe.get_doc("Communication",call[0].name)
-				comm.recording_url = content.get("RecordingUrl")
-				comm.save(ignore_permissions=True)
-				frappe.db.commit()
-				return comm
-			else:
-				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
+			# if response.status_code == 200:
+			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
+			comm = frappe.get_doc("Communication",call[0].name)
+			comm.recording_url = content.get("RecordingUrl")
+			comm.save(ignore_permissions=True)
+			frappe.db.commit()
+			return comm
+			# else:
+			# 	frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 

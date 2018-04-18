@@ -8,17 +8,20 @@
 			</span>
 			</li>
 			<li class="list-group-item">
-				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+				<span class="h3">
+					<i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}
+					<button id="callback" class="btn btn-xs pull-right">Callback</button>
+				</span>
 			</li>
 			<li class="list-group-item">
-				<button id="new_lead" class="btn btn-sm btn-primary">Create Lead</button>
-				<button id="new_customer" class="btn btn-sm btn-primary">Customer</button>
-				<button id="new_caller_issue" class="btn btn-sm btn-primary">Log Issue</button>
+				<button id="new_lead" class="btn btn-xs">Create Lead</button>
+				<button id="new_customer" class="btn btn-xs">Customer</button>
+				<button id="new_caller_issue" class="btn btn-xs">Log Issue</button>
 			</li>
 			{% } else if (info.title == "Customer") { %}
 			<li class="list-group-item">
 				<span class="h4">Customer</span>
-				<span style="margin-left: 10px" class="muted">Services: <span class="strong">{%= info.service_count %}</span></span>
+				<span style="margin-left: 10px" class="muted">Issue Count: <span class="strong">{{ info.issue_list.length }}</span></span>
 			</li>
 			<li class="list-group-item">
 				<span class="h3"><i class="fa fa-user" style="margin-right: 20px"></i>
@@ -26,10 +29,13 @@
 				</span>
 			</li>
 			<li class="list-group-item">
-				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+				<span class="h3">
+					<i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}
+				</span>
+				<button id="callback" class="btn btn-xs pull-right">Callback</button>
 			</li>
 			<li class="list-group-item">
-				<button id="customer_issue" class="btn btn-sm btn-primary">Log Issue</button>
+				<button id="customer_issue" class="btn btn-xs">Log Issue</button>
 			</li>
 			{% } else if (info.title == "Lead") { %}
 			<li class="list-group-item"><h4>Lead</h4></li>
@@ -39,11 +45,14 @@
 				</span>
 			</li>
 			<li class="list-group-item">
-				<span class="h3"><i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}</span>
+				<span class="h3">
+					<i class="fa fa-phone" style="margin-right: 20px"></i>{{ info.number }}
+				</span>
+				<button id="callback" class="btn btn-xs pull-right">Callback</button>
 			</li>
 			<li class="list-group-item">
-				<button id="lead_to_customer" class="btn btn-sm btn-primary">Customer</button>
-				<button id="lead_issue" class="btn btn-sm btn-primary">Log Issue</button>
+				<button id="lead_to_customer" class="btn btn-xs">Customer</button>
+				<button id="lead_issue" class="btn btn-xs">Log Issue</button>
 			</li>
 			{% } %}
 		</ul>

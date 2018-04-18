@@ -49,7 +49,7 @@ def make_popup(caller_no):
 		return popup_html
 
 def render_popup(popup_data):
-	html = frappe.render_template("frappe/public/js/integrations/call_popup.html", popup_data)
+	html = frappe.render_template("erpnext/public/js/integrations/call_popup.html", popup_data)
 	return html
 
 def display_popup(caller_no):
