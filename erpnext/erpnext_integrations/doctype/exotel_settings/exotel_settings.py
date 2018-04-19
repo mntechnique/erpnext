@@ -83,7 +83,7 @@ def handle_incoming_call(*args, **kwargs):
 
 			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"))
-			frappe.publish_realtime('eval_js', 'get_info')	
+			frappe.publish_realtime('eval_js', 'fetch_dashboard_data()', comm)	
 			return comm
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")

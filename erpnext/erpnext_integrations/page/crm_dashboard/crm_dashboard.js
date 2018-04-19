@@ -59,7 +59,7 @@ frappe.CallCenterConsole = Class.extend({
 				callback: function(r){
 					if(r) {
 						me.page.main.find("#cc_console").remove("#cc_console"); 
-						console.log("R",r.message)
+						// console.log("R",r.message,me)
 						content = frappe.render_template("telephony_console", {"info": r.message || null});
 						me.page.main.append(content);
 
@@ -82,6 +82,21 @@ frappe.CallCenterConsole = Class.extend({
 							});
 						} else {
 							me.page.main.find("#callback").on("click", function() {
+								// frappe.call({
+								// 	method: "frappe.email.inbox.make_lead_from_communication",
+								// 	args: {
+								// 		"To": frm.doc.phone_no,
+								// 		"CallerId": frm.doc.exophone,
+								// 		"reference_doctype": frm.doc.reference_doctype || "",
+								// 		"reference_name": frm.doc.reference_name || ""
+								// 	},
+								// 	freeze: true,
+								// 	freeze_message: __("Calling.."),
+								// 	callback: function(r) {
+								// 		frappe.msgprint(__("Call Connected"))
+								// 		console.log("Outbound calls communication",r);
+								// 	}
+								// })
 								me.make_a_call(r.message);
 							});							
 							me.page.main.find("#new_lead").on("click", function() {
@@ -102,43 +117,49 @@ frappe.CallCenterConsole = Class.extend({
 			frappe.show_alert("Please enter a valid number");
 		}
 	},
-	create_lead: function(resp) {
-		var new_lead = frappe.model.make_new_doc_and_get_name('Lead');
-		new_lead = locals["Lead"][new_lead];
-		new_lead.phone = resp.number;
-		new_lead.contact_number = resp.number;
-		new_lead.lead_name = resp.name;	
-		new_lead.status = "Lead";	
+	// create_lead: function(resp) {
+	// 	var new_lead = frappe.model.make_new_doc_and_get_name('Lead');
+	// 	new_lead = locals["Lead"][new_lead];
+	// 	new_lead.phone = resp.number;
+	// 	new_lead.contact_number = resp.number;
+	// 	new_lead.lead_name = resp.name;	
+	// 	new_lead.status = "Lead";	
 		
-		frappe.set_route("Form", "Lead", new_lead.name);
-	},
-	create_customer: function(resp) {
-		var new_customer = frappe.model.make_new_doc_and_get_name('Customer');
-		new_customer = locals["Customer"][new_customer];
-		new_customer.customer_name = resp.name;
-		// new_customer.lead_name = resp.number;
+	// 	frappe.set_route("Form", "Lead", new_lead.name);
+	// },
+	// create_customer: function(resp) {
+	// 	var new_customer = frappe.model.make_new_doc_and_get_name('Customer');
+	// 	new_customer = locals["Customer"][new_customer];
+	// 	new_customer.customer_name = resp.name;
+	// 	// new_customer.lead_name = resp.number;
 		
-		frappe.set_route("Form", "Customer", new_customer.name);
-	},	
-	create_issue: function(resp) {
-		console.log("Issue", resp);
+	// 	frappe.set_route("Form", "Customer", new_customer.name);
+	// },	
+	// create_issue: function(resp) {
+	// 	console.log("Issue", resp);
 
-		var new_issue = frappe.model.make_new_doc_and_get_name('Issue');
-		new_issue = locals["Issue"][new_issue];
+	// 	var new_issue = frappe.model.make_new_doc_and_get_name('Issue');
+	// 	new_issue = locals["Issue"][new_issue];
 	
 
-		if (resp.title == "Customer") {
-			console.log("Setting customer", resp.customer);
-			new_issue.subject = resp.name;
-			new_issue.customer = resp.customer;
-		} else if (resp.title == "Lead") {
-			console.log("Setting lead", resp.lead_name);
-			new_issue.subject = resp.lead_name;
-			new_issue.lead = resp.name;
-		} else {
-			new_issue.subject = resp.title + "-" + resp.number;
-		}
+	// 	if (resp.title == "Customer") {
+	// 		console.log("Setting customer", resp.customer);
+	// 		new_issue.subject = resp.name;
+	// 		new_issue.customer = resp.customer;
+	// 	} else if (resp.title == "Lead") {
+	// 		console.log("Setting lead", resp.lead_name);
+	// 		new_issue.subject = resp.lead_name;
+	// 		new_issue.lead = resp.name;
+	// 	} else {
+	// 		new_issue.subject = resp.title + "-" + resp.number;
+	// 	}
 
-		frappe.set_route("Form", "Issue", new_issue.name);	
-	}
+	// 	frappe.set_route("Form", "Issue", new_issue.name);	
+	// }
 });
+
+
+function fetch_dashboard_data(communication){
+	console.log("Communication",comm)
+	frappe.ccc.get_info();
+}

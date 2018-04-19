@@ -14,7 +14,28 @@ def make_popup(caller_no):
 
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
-		if(contact_doc.get_link_for('Customer')):
+		has_issues = frappe.get_list("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"])
+		if(len(has_issues)>0):
+			if(has_issues[0].customer):
+				customer_full_name = frappe.db.get_value("Customer", has_issues[0].customer, "customer_name")
+				popup_data = {
+					"title": "Customer",
+					"number": caller_no,
+					"name": customer_full_name,
+					"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
+				}
+			elif(has_issues[0].lead):
+				lead_full_name = frappe.db.get_value("Lead", has_issues[0].lead, "lead_name")
+				popup_data = {
+					"title": "Lead",
+					"number": caller_no,
+					"name": lead_full_name,
+					"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
+				}
+
+			popup_html = render_popup(popup_data)
+			return popup_html
+		elif(contact_doc.get_link_for('Customer')):
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
 			popup_data = {
