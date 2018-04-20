@@ -9,7 +9,7 @@ frappe.pages['crm-dashboard'].on_page_load = function(wrapper) {
 
 	if (frappe.get_route()[1]) {
 		page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info();
+		frappe.ccc.get_info(communication=null);
 	}
 }
 
@@ -24,6 +24,7 @@ frappe.CallCenterConsole = Class.extend({
 	init: function(wrapper) {
 		this.page = wrapper.page;
 		this.make();
+		this.fetch_dashboard_data();
 	},
 	make: function() {
 		var me = this;
@@ -51,78 +52,80 @@ frappe.CallCenterConsole = Class.extend({
 	get_info: function() {
 		var me = this;
 		var text = me.page.main.find(".txt-lookup");
+		if (text.val() && !isNaN(text.val())) {
+			frappe.call({
+				method: "erpnext.crm.doctype.crm_settings.crm_settings.get_caller_info",
+				args: { "caller_no": text.val().trim() },
+				callback: function(r){
+					if(r) {
+						me.page.main.find("#cc_console").remove("#cc_console"); 
+						// console.log("R",r.message,me)
+						content = frappe.render_template("telephony_console", {"info": r.message || null});
+						me.page.main.append(content);
 
+						if (r.message.title == "Lead") {
+							me.page.main.find("#callback").on("click", function() {
+								me.make_a_call(r.message);
+							});
+							me.page.main.find("#lead_to_customer").on("click", function() {
+								me.create_customer(r.message);
+							});
+							me.page.main.find("#lead_issue").on("click", function() {
+								me.create_issue(r.message);
+							});
+						} else if(r.message.title == "Customer") {
+							me.page.main.find("#callback").on("click", function() {
+								me.make_a_call(r.message);
+							});
+							me.page.main.find("#customer_issue").on("click", function() {
+								me.create_issue(r.message);
+							});
+						} else {
+							me.page.main.find("#callback").on("click", function() {
+								// frappe.call({
+								// 	method: "frappe.email.inbox.make_lead_from_communication",
+								// 	args: {
+								// 		"To": frm.doc.phone_no,
+								// 		"CallerId": frm.doc.exophone,
+								// 		"reference_doctype": frm.doc.reference_doctype || "",
+								// 		"reference_name": frm.doc.reference_name || ""
+								// 	},
+								// 	freeze: true,
+								// 	freeze_message: __("Calling.."),
+								// 	callback: function(r) {
+								// 		frappe.msgprint(__("Call Connected"))
+								// 		console.log("Outbound calls communication",r);
+								// 	}
+								// })
+								me.make_a_call(r.message);
+							});							
+							me.page.main.find("#new_lead").on("click", function() {
+								me.create_lead(r.message);
+							});
+							me.page.main.find("#new_customer").on("click", function() {
+								me.create_customer(r.message);
+							});
+							me.page.main.find("#new_caller_issue").on("click", function() {
+								me.create_issue(r.message);
+							});						
+						}							
+					}
+				}
+			});
+		} else {
+			frappe.show_alert("Please enter a valid number");
+		}
+	},
+	fetch_dashboard_data: function(){
 		frappe.realtime.on('new_call', function(communication) {
 			if(frappe.get_route()[0] === 'crm-dashboard') {
 				console.log("comm",communication)
-				if (text.val() && !isNaN(text.val())) {
-					frappe.call({
-						method: "erpnext.crm.doctype.crm_settings.crm_settings.get_caller_info",
-						args: { "caller_no": text.val().trim() },
-						callback: function(r){
-							if(r) {
-								me.page.main.find("#cc_console").remove("#cc_console"); 
-								// console.log("R",r.message,me)
-								content = frappe.render_template("telephony_console", {"info": r.message || null});
-								me.page.main.append(content);
 
-								if (r.message.title == "Lead") {
-									me.page.main.find("#callback").on("click", function() {
-										me.make_a_call(r.message);
-									});
-									me.page.main.find("#lead_to_customer").on("click", function() {
-										me.create_customer(r.message);
-									});
-									me.page.main.find("#lead_issue").on("click", function() {
-										me.create_issue(r.message);
-									});
-								} else if(r.message.title == "Customer") {
-									me.page.main.find("#callback").on("click", function() {
-										me.make_a_call(r.message);
-									});
-									me.page.main.find("#customer_issue").on("click", function() {
-										me.create_issue(r.message);
-									});
-								} else {
-									me.page.main.find("#callback").on("click", function() {
-										// frappe.call({
-										// 	method: "frappe.email.inbox.make_lead_from_communication",
-										// 	args: {
-										// 		"To": frm.doc.phone_no,
-										// 		"CallerId": frm.doc.exophone,
-										// 		"reference_doctype": frm.doc.reference_doctype || "",
-										// 		"reference_name": frm.doc.reference_name || ""
-										// 	},
-										// 	freeze: true,
-										// 	freeze_message: __("Calling.."),
-										// 	callback: function(r) {
-										// 		frappe.msgprint(__("Call Connected"))
-										// 		console.log("Outbound calls communication",r);
-										// 	}
-										// })
-										me.make_a_call(r.message);
-									});							
-									me.page.main.find("#new_lead").on("click", function() {
-										me.create_lead(r.message);
-									});
-									me.page.main.find("#new_customer").on("click", function() {
-										me.create_customer(r.message);
-									});
-									me.page.main.find("#new_caller_issue").on("click", function() {
-										me.create_issue(r.message);
-									});						
-								}							
-							}
-						}
-					});
-				} else {
-					frappe.show_alert("Please enter a valid number");
-				}
 			} else {
-				frappe.utils.notify(__("Incoming call");
+				frappe.utils.notify(__("Incoming call"));
 			}
 		});
-	},
+	}
 	// create_lead: function(resp) {
 	// 	var new_lead = frappe.model.make_new_doc_and_get_name('Lead');
 	// 	new_lead = locals["Lead"][new_lead];
