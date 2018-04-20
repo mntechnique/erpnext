@@ -106,10 +106,10 @@ frappe.CallCenterConsole = Class.extend({
 	},
 	fetch_dashboard_data: function(){
 		var me = this;
-		frappe.realtime.on('new_call', (message) => {
+		frappe.realtime.on('new_call', (comm_details) => {
 			if(frappe.get_route()[0] == 'crm-dashboard') {
-				console.log("comm",communication);
-				me.get_info(message);
+				console.log("comm",comm_details);
+				me.get_info(comm_details);
 			} else {
 				frappe.utils.notify(__("Incoming call"));
 			}
