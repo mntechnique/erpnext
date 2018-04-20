@@ -49,10 +49,11 @@ frappe.CallCenterConsole = Class.extend({
             }
 		});
 	},
-	get_info: function() {
+	get_info: function(communication) {
 		var me = this;
 		if(communication){
 			console.log("INSIDE COMM IF")
+			wrapper.page.wrapper.find('.txt-lookup').val(communication.get("phone_no"));
 		}
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
@@ -85,31 +86,50 @@ frappe.CallCenterConsole = Class.extend({
 							});
 						} else {
 							me.page.main.find("#callback").on("click", function() {
-								// frappe.call({
-								// 	method: "frappe.email.inbox.make_lead_from_communication",
-								// 	args: {
-								// 		"To": frm.doc.phone_no,
-								// 		"CallerId": frm.doc.exophone,
-								// 		"reference_doctype": frm.doc.reference_doctype || "",
-								// 		"reference_name": frm.doc.reference_name || ""
-								// 	},
-								// 	freeze: true,
-								// 	freeze_message: __("Calling.."),
-								// 	callback: function(r) {
-								// 		frappe.msgprint(__("Call Connected"))
-								// 		console.log("Outbound calls communication",r);
-								// 	}
-								// })
-								me.make_a_call(r.message);
+								frappe.call({
+									method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
+									args: {
+										"To": frm.doc.phone_no,
+										"CallerId": frm.doc.exophone,
+										"reference_doctype": frm.doc.reference_doctype || "",
+										"reference_name": frm.doc.reference_name || ""
+									},
+									freeze: true,
+									freeze_message: __("Calling.."),
+									callback: function(r) {
+										frappe.msgprint(__("Call Connected"))
+										console.log("Outbound calls communication",r);
+									}
+								})
 							});							
 							me.page.main.find("#new_lead").on("click", function() {
-								me.create_lead(r.message);
+								frappe.call({
+									method: "frappe.email.inbox.make_lead_from_communication",
+									args: {
+										"communication":communication
+									},
+									freeze: true,
+									freeze_message: __("Making Lead.."),
+									callback: function(r) {
+										console.log("Lead made",r);
+									}
+								})
 							});
 							me.page.main.find("#new_customer").on("click", function() {
 								me.create_customer(r.message);
 							});
 							me.page.main.find("#new_caller_issue").on("click", function() {
-								me.create_issue(r.message);
+								frappe.call({
+									method: "frappe.email.inbox.make_issue_from_communication",
+									args: {
+										"communication":communication
+									},
+									freeze: true,
+									freeze_message: __("Making Issue.."),
+									callback: function(r) {
+										console.log("Issue created",r);
+									}
+								})
 							});						
 						}							
 					}
@@ -169,14 +189,3 @@ frappe.CallCenterConsole = Class.extend({
 	// 	frappe.set_route("Form", "Issue", new_issue.name);	
 	// }
 });
-
-// function fetch_dashboard_data(){
-// 	frappe.realtime.on('new_call', function(communication) {
-// 		if(frappe.get_route()[0] === 'crm-dashboard') {
-// 			console.log("comm",communication)
-// 			frappe.ccc.get_info();
-// 		} else {
-// 			frappe.utils.notify(__("Incoming call");
-// 		}
-// 	});
-// }
