@@ -81,8 +81,9 @@ def handle_incoming_call(*args, **kwargs):
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
+			message = comm.as_dict()
 
-			frappe.publish_realtime('new_call', comm.as_dict(), after_commit=True)
+			frappe.publish_realtime('new_call', message, after_commit=False)
 
 			return comm
 	except Exception as e:

@@ -51,6 +51,9 @@ frappe.CallCenterConsole = Class.extend({
 	},
 	get_info: function() {
 		var me = this;
+		if(communication){
+			console.log("INSIDE COMM IF")
+		}
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
 			frappe.call({
@@ -117,10 +120,10 @@ frappe.CallCenterConsole = Class.extend({
 		}
 	},
 	fetch_dashboard_data: function(){
-		frappe.realtime.on('new_call', function(communication) {
-			if(frappe.get_route()[0] === 'crm-dashboard') {
+		frappe.realtime.on('new_call', (communication) => {
+			if(frappe.get_route()[0] == 'crm-dashboard') {
 				console.log("comm",communication)
-
+				me.get_info(communication)
 			} else {
 				frappe.utils.notify(__("Incoming call"));
 			}
