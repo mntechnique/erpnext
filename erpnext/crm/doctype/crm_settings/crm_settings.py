@@ -57,6 +57,13 @@ def make_popup(caller_no):
 						"name": lead_full_name,
 						"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 					}
+				else:
+					popup_data = {
+						"title": "Contact",
+						"number": caller_no,
+						"name": contact_doc.get("first_name") + contact_doc.get("last_name"),
+						"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
+					}
 
 				popup_html = render_popup(popup_data)
 				return popup_html
@@ -74,7 +81,7 @@ def render_popup(popup_data):
 	html = frappe.render_template("erpnext/public/js/integrations/call_popup.html", popup_data)
 	return html
 
-def display_popup(caller_no,communication):
+def display_popup(caller_no, comm_details):
 	# agent_no = popup_json.get("destination")
 
 	try:
@@ -85,7 +92,7 @@ def display_popup(caller_no,communication):
 		users = frappe.get_all("Has Role", filters={"parenttype":"User","role":"Support Team"}, fields=["parent"])
 		agents = [user.get("parent") for user in users]
 		for agent in agents:
-			popup_html["route_link"] = communication 
+			popup_html["route_link"] = comm_details 
 			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)
 
 	except Exception as e:
