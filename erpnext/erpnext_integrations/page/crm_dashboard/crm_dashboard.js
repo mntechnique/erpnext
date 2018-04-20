@@ -9,14 +9,14 @@ frappe.pages['crm-dashboard'].on_page_load = function(wrapper) {
 
 	if (frappe.get_route()[1]) {
 		page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info(communication=null);
+		frappe.ccc.get_info(frappe.get_route()[2]);
 	}
 }
 
 frappe.pages['crm-dashboard'].refresh = function(wrapper) {
 	if (frappe.ccc && frappe.get_route()[1]) {
 		wrapper.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info();
+		frappe.ccc.get_info(frappe.get_route()[2]);
 	}
 }
 
@@ -53,7 +53,7 @@ frappe.CallCenterConsole = Class.extend({
 		var me = this;
 		if(communication){
 			console.log("INSIDE COMM IF")
-			wrapper.page.wrapper.find('.txt-lookup').val(communication.get("phone_no"));
+			me.page.wrapper.find('.txt-lookup').val(communication.get("phone_no"));
 		}
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
@@ -89,10 +89,10 @@ frappe.CallCenterConsole = Class.extend({
 								frappe.call({
 									method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
 									args: {
-										"To": frm.doc.phone_no,
-										"CallerId": frm.doc.exophone,
-										"reference_doctype": frm.doc.reference_doctype || "",
-										"reference_name": frm.doc.reference_name || ""
+										"To": communication.phone_no,
+										"CallerId": communication.exophone,
+										"reference_doctype": communication.reference_doctype || "",
+										"reference_name": communication.reference_name || ""
 									},
 									freeze: true,
 									freeze_message: __("Calling.."),

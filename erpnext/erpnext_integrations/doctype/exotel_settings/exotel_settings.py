@@ -63,8 +63,6 @@ def handle_incoming_call(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
-			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"))
 			comm = frappe.new_doc("Communication")
 			comm.subject = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
 			comm.send_email = 0
@@ -81,8 +79,11 @@ def handle_incoming_call(*args, **kwargs):
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
-			
+
 			message = comm.as_dict()
+
+			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
+				display_popup(content.get("CallFrom"),message)
 			frappe.publish_realtime('new_call', message, after_commit=False)
 
 			return comm
