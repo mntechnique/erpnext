@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.model.document import Document
-from erpnext.crm.doctype.crm_settings.crm_settings import make_popup,render_popup,display_popup
+from erpnext.crm.doctype.crm_settings.crm_settings import display_popup
 from six.moves.urllib.parse import urlparse
 import requests
 
@@ -80,10 +80,16 @@ def handle_incoming_call(*args, **kwargs):
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 
-			message = comm.as_dict()
+			message = {
+				"communication_name":comm.name,
+				"communication_phone_no":comm.phone_no,
+				"communication_exophone":comm.exophone,
+				"communication_reference_doctype":comm.reference_doctype or "",
+				"communication_reference_name":comm.reference_name or ""
+			}
 
 			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"),message)
+				display_popup(content.get("CallFrom"), message)
 			frappe.publish_realtime('new_call', message, after_commit=False)
 
 			return comm
