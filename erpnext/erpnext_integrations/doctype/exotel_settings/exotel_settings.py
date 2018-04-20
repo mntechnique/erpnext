@@ -81,8 +81,9 @@ def handle_incoming_call(*args, **kwargs):
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
-			
-			frappe.publish_realtime('eval_js', 'fetch_dashboard_data()', comm)	
+
+			frappe.publish_realtime('new_call', comm.as_dict(), after_commit=True)
+
 			return comm
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")
