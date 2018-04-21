@@ -76,6 +76,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
 			comm.exophone = content.get("CallTo")
+			comm.call_receiver = content.get("DialWhomNumber")
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
@@ -83,6 +84,7 @@ def handle_incoming_call(*args, **kwargs):
 			message = {
 				"communication_name":comm.name,
 				"communication_phone_no":comm.phone_no,
+				"call_receiver":comm.call_receiver,
 				"communication_exophone":comm.exophone,
 				"communication_reference_doctype":comm.reference_doctype or "",
 				"communication_reference_name":comm.reference_name or ""
@@ -114,6 +116,7 @@ def capture_call_details(*args, **kwargs):
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 			comm = frappe.get_doc("Communication",call[0].name)
 			comm.recording_url = content.get("RecordingUrl")
+			comm.content = PCD + str(content)
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 			return comm

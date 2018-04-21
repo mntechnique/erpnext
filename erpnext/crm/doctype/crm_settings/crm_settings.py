@@ -64,12 +64,11 @@ def make_popup(caller_no, comm_details):
 						"name": contact_doc.get("first_name") + contact_doc.get("last_name"),
 						"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 					}
-				popup_data["route_link"] = 
-					comm_details.communication_name + "/" \
-					comm_details.communication_phone_no + "/" \
-					comm_details.communication_exophone +  "/" \
-					comm_details.communication_reference_doctype + "/" \
-					comm_details.communication_reference_name + "/"
+				popup_data["route_link"] = str(comm_details.get("communication_name") + "/" +
+					comm_details.get("communication_phone_no") + "/" +
+					comm_details.get("communication_exophone") +  "/" +
+					comm_details.get("communication_reference_doctype") + "/" +
+					comm_details.get("communication_reference_name"))
 				popup_html = render_popup(popup_data)
 				return popup_html
 	else:
@@ -79,12 +78,11 @@ def make_popup(caller_no, comm_details):
 			"name": "Unknown",
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
-		popup_data["route_link"] = 
-			comm_details.communication_name + "/" \
-			comm_details.communication_phone_no + "/" \
-			comm_details.communication_exophone +  "/" \
-			comm_details.communication_reference_doctype + "/" \
-			comm_details.communication_reference_name + "/"
+		popup_data["route_link"] = str(comm_details.communication_name + "/" +
+			comm_details.communication_phone_no + "/" +
+			comm_details.communication_exophone +  "/" +
+			comm_details.communication_reference_doctype + "/" +
+			comm_details.communication_reference_name)
 		popup_html = render_popup(popup_data)
 		return popup_html
 
@@ -100,10 +98,10 @@ def display_popup(caller_no, comm_details):
 		# if agent_id:
 		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
 		# else:
-		users = frappe.get_all("Has Role", filters={"parenttype":"User","role":"Support Team"}, fields=["parent"])
-		agents = [user.get("parent") for user in users]
-		for agent in agents: 
-			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)
+		users = frappe.get_all("User", or_filters={"phone":comm.details.call_receiver,"mobile_no":comm.details.call_receiver}, fields=["*"])
+		# agents = [user.get("parent") for user in users]
+		# for agent in agents: 
+		frappe.async.publish_realtime(event="msgprint", message=popup_html, user=users[0].name)
 
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
