@@ -9,14 +9,14 @@ frappe.pages['crm-dashboard'].on_page_load = function(wrapper) {
 
 	if (frappe.get_route()[1]) {
 		page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info(frappe.get_route()[2]);
+		frappe.ccc.get_info();
 	}
 }
 
 frappe.pages['crm-dashboard'].refresh = function(wrapper) {
 	if (frappe.ccc && frappe.get_route()[1]) {
 		wrapper.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info(frappe.get_route()[2]);
+		frappe.ccc.get_info();
 	}
 }
 
@@ -24,7 +24,7 @@ frappe.CallCenterConsole = Class.extend({
 	init: function(wrapper) {
 		this.page = wrapper.page;
 		this.make();
-		this.fetch_dashboard_data();
+		this.setup_realtime();
 	},
 	make: function() {
 		var me = this;
@@ -44,17 +44,19 @@ frappe.CallCenterConsole = Class.extend({
 
 		me.page.main.on("keypress", ".txt-lookup", function(ev) {
 			var keycode = (ev.keyCode ? ev.keyCode : ev.which);
-            if (keycode == '13') {
+			if (keycode == '13') {
 				me.get_info();
-            }
+			}
 		});
 	},
 	get_info: function(comm_details) {
 		var me = this;
-		if(comm_details){
-			console.log("INSIDE COMM IF")
-			me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
+		me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
+		if(frappe.get_route()[2]){
+			console.log("l",typeof(frappe.get_route()[2]));
+		me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[2]);
 		}
+
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
 			frappe.call({
@@ -104,7 +106,7 @@ frappe.CallCenterConsole = Class.extend({
 			frappe.show_alert("Please enter a valid number");
 		}
 	},
-	fetch_dashboard_data: function(){
+	setup_realtime: function(){
 		var me = this;
 		frappe.realtime.on('new_call', (comm_details) => {
 			if(frappe.get_route()[0] == 'crm-dashboard') {

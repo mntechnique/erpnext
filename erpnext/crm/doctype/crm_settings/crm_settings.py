@@ -9,7 +9,7 @@ from frappe.model.document import Document
 class CRMSettings(Document):
 	pass
 
-def make_popup(caller_no):
+def make_popup(caller_no, comm_details):
 	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no}, ignore_permissions=True)
 
 	if len(contact_lookup) > 0:
@@ -64,7 +64,12 @@ def make_popup(caller_no):
 						"name": contact_doc.get("first_name") + contact_doc.get("last_name"),
 						"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 					}
-				popup_data["route_link"] = comm_details
+				popup_data["route_link"] = 
+					comm_details.communication_name + "/" \
+					comm_details.communication_phone_no + "/" \
+					comm_details.communication_exophone +  "/" \
+					comm_details.communication_reference_doctype + "/" \
+					comm_details.communication_reference_name + "/"
 				popup_html = render_popup(popup_data)
 				return popup_html
 	else:
@@ -74,7 +79,12 @@ def make_popup(caller_no):
 			"name": "Unknown",
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
-		popup_data["route_link"] = comm_details
+		popup_data["route_link"] = 
+			comm_details.communication_name + "/" \
+			comm_details.communication_phone_no + "/" \
+			comm_details.communication_exophone +  "/" \
+			comm_details.communication_reference_doctype + "/" \
+			comm_details.communication_reference_name + "/"
 		popup_html = render_popup(popup_data)
 		return popup_html
 
