@@ -98,9 +98,15 @@ def display_popup(caller_no, comm_details):
 		# if agent_id:
 		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
 		# else:
-		users = frappe.get_all("User", or_filters={"phone":comm_details.call_receiver,"mobile_no":comm_details.call_receiver}, fields=["name"])
-
-		frappe.async.publish_realtime(event="msgprint", message=popup_html, user=users[0].name)
+		try:
+			users = frappe.get_all("User", or_filters={"phone":comm_details.call_receiver,"mobile_no":comm_details.call_receiver}, fields=["name"])
+			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=users[0].name)
+			a = frappe.new_doc("Note")
+			a.content = "Popup was shown to" + users[0].name
+			a.save()
+			frappe.db.commit()
+		except Exception as e:
+			frappe.log_error(message=frappe.get_traceback(), title="Popup restriction errors")
 
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
