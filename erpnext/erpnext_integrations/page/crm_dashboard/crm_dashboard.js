@@ -54,7 +54,7 @@ frappe.CallCenterConsole = Class.extend({
 		me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
 		if(frappe.get_route()[2]){
 			console.log("l",typeof(frappe.get_route()[2]));
-		me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[2]);
+			me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[2]);
 		}
 
 		var text = me.page.main.find(".txt-lookup");

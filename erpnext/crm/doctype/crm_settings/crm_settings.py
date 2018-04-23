@@ -98,9 +98,8 @@ def display_popup(caller_no, comm_details):
 		# if agent_id:
 		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
 		# else:
-		users = frappe.get_all("User", or_filters={"phone":comm.details.call_receiver,"mobile_no":comm.details.call_receiver}, fields=["*"])
-		# agents = [user.get("parent") for user in users]
-		# for agent in agents: 
+		users = frappe.get_all("User", or_filters={"phone":comm_details.call_receiver,"mobile_no":comm_details.call_receiver}, fields=["name"])
+
 		frappe.async.publish_realtime(event="msgprint", message=popup_html, user=users[0].name)
 
 	except Exception as e:
