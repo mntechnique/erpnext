@@ -79,10 +79,10 @@ def make_popup(caller_no, comm_details):
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
 		popup_data["route_link"] = str(comm_details.communication_name + "/" +
-			comm_details.communication_phone_no + "/" +
-			comm_details.communication_exophone +  "/" +
-			comm_details.communication_reference_doctype + "/" +
-			comm_details.communication_reference_name)
+			comm_details.get("communication_phone_no") + "/" +
+			comm_details.get("communication_exophone") +  "/" +
+			comm_details.get("communication_reference_doctype") + "/" +
+			comm_details.get("communication_reference_name"))
 		popup_html = render_popup(popup_data)
 		return popup_html
 
@@ -99,12 +99,9 @@ def display_popup(caller_no, comm_details):
 		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
 		# else:
 		try:
-			users = frappe.get_all("User", or_filters={"phone":comm_details.call_receiver,"mobile_no":comm_details.call_receiver}, fields=["name"])
-			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=users[0].name)
-			a = frappe.new_doc("Note")
-			a.content = "Popup was shown to" + users[0].name
-			a.save()
-			frappe.db.commit()
+			users = frappe.get_all("User", or_filters={"phone":comm_details.get("call_receiver"),"mobile_no":comm_details.get("call_receiver")}, fields=["name"])
+			frappe.async.publish_realtime(event="show_popup", message=popup_html, user=users[0].name)
+
 		except Exception as e:
 			frappe.log_error(message=frappe.get_traceback(), title="Popup restriction errors")
 
