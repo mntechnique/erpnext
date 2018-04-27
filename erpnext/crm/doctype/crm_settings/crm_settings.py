@@ -78,7 +78,7 @@ def make_popup(caller_no, comm_details):
 			"name": "Unknown",
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
-		popup_data["route_link"] = str(comm_details.communication_name + "/" +
+		popup_data["route_link"] = str(comm_details.get("communication_name") + "/" +
 			comm_details.get("communication_phone_no") + "/" +
 			comm_details.get("communication_exophone") +  "/" +
 			comm_details.get("communication_reference_doctype") + "/" +

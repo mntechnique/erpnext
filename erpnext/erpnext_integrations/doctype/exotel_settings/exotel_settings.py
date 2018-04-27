@@ -76,7 +76,6 @@ def handle_incoming_call(*args, **kwargs):
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
 			comm.exophone = content.get("CallTo")
-			comm.call_receiver = content.get("DialWhomNumber")
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
@@ -90,13 +89,34 @@ def handle_incoming_call(*args, **kwargs):
 				"communication_reference_name":comm.reference_name or ""
 			}
 
-			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"), message)
 			frappe.publish_realtime('new_call', message, after_commit=False)
 
 			return comm
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")
+
+@frappe.whitelist(allow_guest=True)
+def popup_details(*args, **kwargs):
+	""" Captures data needed for popup display """
+
+	try:
+		if args or kwargs:
+			credentials = frappe.get_doc("Exotel Settings")
+			content = args or kwargs
+
+			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
+			comm = frappe.get_doc("Communication",call[0].name)
+			comm.call_receiver = content.get("DialWhomNumber")
+			comm.save(ignore_permissions=True)
+			frappe.db.commit()
+
+			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
+				display_popup(content.get("CallFrom"), message)
+
+			return comm
+
+	except Exception as e:
+		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing popup details")
 
 @frappe.whitelist(allow_guest=True)
 def capture_call_details(*args, **kwargs):
