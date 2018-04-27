@@ -91,16 +91,12 @@ def render_popup(popup_data):
 	return html
 
 def display_popup(caller_no, comm_details):
-	# agent_no = popup_json.get("destination")
-
 	try:
 		popup_html = make_popup(caller_no, comm_details)
-		# if agent_id:
-		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
-		# else:
+
 		try:
 			users = frappe.get_all("User", or_filters={"phone":comm_details.get("call_receiver"),"mobile_no":comm_details.get("call_receiver")}, fields=["name"])
-			frappe.async.publish_realtime(event="show_popup", message=popup_html, user=users[0].get("name"))
+			frappe.async.publish_realtime(event="show_popup", message=popup_html, user=users[0].name)
 
 		except Exception as e:
 			frappe.log_error(message=frappe.get_traceback(), title="Popup restriction errors")

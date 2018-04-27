@@ -83,7 +83,7 @@ def handle_incoming_call(*args, **kwargs):
 			message = {
 				"communication_name":comm.name,
 				"communication_phone_no":comm.phone_no,
-				"call_receiver":comm.call_receiver,
+				"call_receiver":"",
 				"communication_exophone":comm.exophone,
 				"communication_reference_doctype":comm.reference_doctype or "",
 				"communication_reference_name":comm.reference_name or ""
@@ -135,12 +135,6 @@ def capture_call_details(*args, **kwargs):
 			credentials = frappe.get_doc("Exotel Settings")
 			content = args or kwargs
 
-			# response = requests.get('https://api.exotel.com/v1/Accounts/{sid}/Calls/{callsid}.json'.format(sid = credentials.exotel_sid,callsid = content.get("CallSid")),\
-			# 	auth=(credentials.exotel_sid,credentials.exotel_token))
-
-			# content = response.json()["Call"]
-
-			# if response.status_code == 200:
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 			comm = frappe.get_doc("Communication",call[0].name)
 			comm.recording_url = content.get("RecordingUrl")
@@ -148,8 +142,7 @@ def capture_call_details(*args, **kwargs):
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 			return comm
-			# else:
-			# 	frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
+
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 
