@@ -116,6 +116,13 @@ frappe.CallCenterConsole = Class.extend({
 				frappe.utils.notify(__("Incoming call"));
 			}
 		});
+		frappe.realtime.on('show_popup', (popup_data) => {
+			frappe.msgprint({
+				title: __('Incoming Call'),
+				message: __(popup_data)
+			});
+			$('.modal-backdrop').unbind('click');
+		});
 	},
 	make_a_call: function(comm_details){
 		frappe.call({
