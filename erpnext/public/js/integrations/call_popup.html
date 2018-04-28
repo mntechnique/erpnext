@@ -1,4 +1,4 @@
-<ul style="list-style: none">
+<ul data-controls-modal="call_popup" data-backdrop="static" data-keyboard="false" style="list-style: none">
 	<li><h3><i class="fa fa-phone" style="margin-right: 20px"></i>{{ number }}</h3></li>
 	<li>
 		<h3>
@@ -14,5 +14,10 @@
 <br><span class="small text-muted">Call received at {{ call_timestamp }}</span>
 
 <script>
-$('.modal-backdrop').unbind('click');
+// $(document).ready(function(){
+//     $(".msgprint").parentsUntil(".modal").modal({
+//         backdrop: 'static',
+//         keyboard: false
+//     });
+// });
 </script>

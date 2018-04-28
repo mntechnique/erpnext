@@ -98,10 +98,8 @@ def handle_incoming_call(*args, **kwargs):
 @frappe.whitelist(allow_guest=True)
 def popup_details(*args, **kwargs):
 	""" Captures data needed for popup display """
-
 	try:
 		if args or kwargs:
-			credentials = frappe.get_doc("Exotel Settings")
 			content = args or kwargs
 
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
@@ -132,7 +130,6 @@ def capture_call_details(*args, **kwargs):
 
 	try:
 		if args or kwargs:
-			credentials = frappe.get_doc("Exotel Settings")
 			content = args or kwargs
 
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
