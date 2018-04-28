@@ -96,7 +96,7 @@ def display_popup(caller_no, comm_details):
 
 		try:
 			users = frappe.get_all("User", or_filters={"phone":comm_details.get("call_receiver"),"mobile_no":comm_details.get("call_receiver")}, fields=["name"])
-			frappe.async.publish_realtime(event="show_popup", message=popup_html, user=users[0].name)
+			frappe.publish_realtime('show_popup', popup_html, user=users[0].name, after_commit=False)
 
 		except Exception as e:
 			frappe.log_error(message=frappe.get_traceback(), title="Popup restriction errors")
