@@ -13,8 +13,6 @@
 </ul>
 <br><span class="small text-muted">Call received at {{ call_timestamp }}</span>
 
-<style>
-.modal{
-	backdrop:static;
-}	
-</style>
+<script>
+$('.modal-backdrop').unbind('click');
+</script>
