@@ -93,8 +93,8 @@ frappe.CallCenterConsole = Class.extend({
 								me.make_a_call(comm_details,frappe.get_route()[1]);
 							});							
 							me.page.main.find("#new_lead").on("click", function() {
-								name_details = me.get_basic_details();
-								me.create_lead(comm_details,frappe.get_route()[1],name_details);
+								name_details = me.get_basic_details(comm_details,frappe.get_route()[1]);
+								
 							});
 							me.page.main.find("#new_customer").on("click", function() {
 								// me.create_customer(r.message);
@@ -121,7 +121,7 @@ frappe.CallCenterConsole = Class.extend({
 			}
 		});
 	},
-	get_basic_details:function(){
+	get_basic_details:function(comm_details,comm_name){
 		var d = new frappe.ui.Dialog({
 			title: __('Basic Details'),
 			fields: [
@@ -139,14 +139,15 @@ frappe.CallCenterConsole = Class.extend({
 				}				
 			],
 			primary_action: function() {
-				var data = d.get_values();
-				return data;
+				var name_details = d.get_values();
+				me.create_lead(comm_details,comm_name,name_details);
 				d.hide()
 			},
 			primary_action_label: __('Save')
 		});
 		d.show();
 	},
+
 	make_a_call: function(comm_details,comm_name){
 		if(!comm_details){
 			console.log("Thamb jara")
