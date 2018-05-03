@@ -54,8 +54,8 @@ frappe.CallCenterConsole = Class.extend({
 		if(comm_details){
 			me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
 		}
-		else if(frappe.get_route()[2]){
-			me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[2]);
+		else if(frappe.get_route()[1]){
+			me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
 		}
 
 		var text = me.page.main.find(".txt-lookup");
@@ -65,8 +65,10 @@ frappe.CallCenterConsole = Class.extend({
 				args: { "caller_no": text.val().trim() },
 				callback: function(r){
 					if(r) {
-						me.page.main.find("#cc_console").remove("#cc_console"); 
-						content = frappe.render_template("telephony_console", {"info": r.message || null});
+						me.page.main.find("#cc_console").remove("#cc_console");
+						console.log("R",r.message);
+
+						content = frappe.render_template('telephony_console', {"info": r.message});
 						me.page.main.append(content);
 
 						if (r.message.title == "Lead") {
@@ -99,7 +101,7 @@ frappe.CallCenterConsole = Class.extend({
 							me.page.main.find("#new_caller_issue").on("click", function() {
 								me.create_issue(comm_details);
 							});						
-						}							
+						}
 					}
 				}
 			});
@@ -171,3 +173,8 @@ frappe.CallCenterConsole = Class.extend({
 		})
 	}
 });
+
+// function render_template(r){
+// 	let telephony_console = `${r.toString()}`
+// 	return telephony_console;
+// }

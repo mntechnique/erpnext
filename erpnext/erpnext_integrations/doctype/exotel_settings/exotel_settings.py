@@ -166,10 +166,14 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 		)
 		status_callback_url = server_url + endpoint
 
+		user_number = frappe.get_doc("User",frappe.session.user).phone or frappe.get_doc("User",frappe.session.user).mobile_no
+		if not user_number:
+			return frappe.msgprint(_("User's contact number missing.Please verify and try again."))
+
 		response = requests.post('https://api.exotel.in/v1/Accounts/{sid}/Calls/connect.json'.format(sid=credentials.exotel_sid),
         auth = (credentials.exotel_sid,credentials.exotel_token),
 		data = {
-			'From': frappe.get_doc("User",frappe.session.user).phone or frappe.get_doc("User",frappe.session.user).mobile_no,
+			'From': user_number,
 			'To': To,
 			'CallerId': CallerId,
 			'StatusCallback':"http://159.65.150.239/api/method/erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
