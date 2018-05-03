@@ -127,7 +127,6 @@ def popup_details(*args, **kwargs):
 @frappe.whitelist(allow_guest=True)
 def capture_call_details(*args, **kwargs):
 	""" Captures post-call details in telephony service. """
-
 	try:
 		if args or kwargs:
 			content = args or kwargs

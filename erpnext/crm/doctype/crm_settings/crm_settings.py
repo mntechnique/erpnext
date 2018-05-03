@@ -104,6 +104,21 @@ def display_popup(caller_no, comm_details):
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
 
+def update_lead_and_make_contact(args):
+	# update lead
+	contact = frappe.get_doc({
+		'doctype': 'Contact',
+		'first_name': args.get('first_name'),
+		'last_name': args.get('last_name'),
+		'mobile_no': args.get('mobile_no'),
+		'links': [{
+			'link_doctype': "Lead",
+			'link_name': args.get('lead_docname')
+		}]
+	}).insert()
+
+	return contact
+
 @frappe.whitelist()
 def get_caller_info(caller_no):
 	if caller_no and len(caller_no) > 13:

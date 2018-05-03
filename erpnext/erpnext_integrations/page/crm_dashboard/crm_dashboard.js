@@ -93,7 +93,8 @@ frappe.CallCenterConsole = Class.extend({
 								me.make_a_call(comm_details,frappe.get_route()[1]);
 							});							
 							me.page.main.find("#new_lead").on("click", function() {
-								me.create_lead(comm_details,frappe.get_route()[1]);
+								name_details = me.get_basic_details();
+								me.create_lead(comm_details,frappe.get_route()[1],name_details);
 							});
 							me.page.main.find("#new_customer").on("click", function() {
 								// me.create_customer(r.message);
@@ -120,6 +121,32 @@ frappe.CallCenterConsole = Class.extend({
 			}
 		});
 	},
+	get_basic_details:function(){
+		var d = new frappe.ui.Dialog({
+			title: __('Basic Details'),
+			fields: [
+				{
+					"label": "First Name",
+					"fieldname": "first_name",
+					"fieldtype": "Data",
+					"reqd": 1
+				},
+				{
+					"label": "Last Name",
+					"fieldname": "last_name",
+					"fieldtype": "Data",
+					"reqd": 1
+				}				
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				return data;
+				d.hide()
+			},
+			primary_action_label: __('Save')
+		});
+		d.show();
+	},
 	make_a_call: function(comm_details,comm_name){
 		if(!comm_details){
 			console.log("Thamb jara")
@@ -141,7 +168,8 @@ frappe.CallCenterConsole = Class.extend({
 		});
 	},
 
-	create_lead: function(comm_details,comm_name) {
+	create_lead: function(comm_details,comm_name,name_details) {
+		var me = this;
 		communication_docname = comm_details.communication_name || comm_name;
 		frappe.call({
 			method: "frappe.email.inbox.make_lead_from_communication",
@@ -152,9 +180,35 @@ frappe.CallCenterConsole = Class.extend({
 			freeze_message: __("Making Lead.."),
 			callback: function(r) {
 				console.log("Lead made",r);
+				me.page.main.find("#new_lead").addClass(".hidden");
+				me.page.main.find("#linked_lead").removeClass(".hidden");
+				me.page.page.main.find("#new_lead")[0].innerHTML = r;
+				console.log("ND",name_details);
+				args = {
+					first_name: name_details.first_name,
+					last_name: name_details.last_name,
+					lead_docname: r,
+					mobile_no: me.page.main.find(".txt-lookup").val().trim()
+				}
+				me.update_lead_and_make_contact(args);
+
 			}
 		});
 	},
+	update_lead_and_make_contact: function(args) {
+		frappe.call({
+			method: "erpnext.crm.doctype.crm_settings.crm_settings.update_lead_and_make_contact",
+			args: {
+				"args": args
+			},
+			freeze: true,
+			freeze_message: __("Making Issue.."),
+			callback: function(r) {
+				 
+			}
+		})
+	},
+
 	// create_customer: function(resp) {
 	// 	var new_customer = frappe.model.make_new_doc_and_get_name('Customer');
 	// 	new_customer = locals["Customer"][new_customer];
@@ -174,6 +228,10 @@ frappe.CallCenterConsole = Class.extend({
 			freeze_message: __("Making Issue.."),
 			callback: function(r) {
 				console.log("Issue created",r);
+				me.page.main.find("#new_caller_issue").addClass(".hidden");
+				me.page.main.find("#linked_issue").removeClass(".hidden");
+				me.page.page.main.find("#new_caller_issue")[0].innerHTML = r;
+				// 
 			}
 		})
 	}
