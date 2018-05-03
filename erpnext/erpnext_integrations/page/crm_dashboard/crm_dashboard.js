@@ -73,33 +73,33 @@ frappe.CallCenterConsole = Class.extend({
 
 						if (r.message.title == "Lead") {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details);
+								me.make_a_call(comm_details,frappe.get_route()[1]);
 							});
 							me.page.main.find("#lead_to_customer").on("click", function() {
 								// me.create_customer(r.message);
 							});
 							me.page.main.find("#lead_issue").on("click", function() {
-								me.create_issue(comm_details);
+								me.create_issue(comm_details,frappe.get_route()[1]);
 							});
 						} else if(r.message.title == "Customer") {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details);
+								me.make_a_call(comm_details,frappe.get_route()[1]);
 							});
 							me.page.main.find("#customer_issue").on("click", function() {
-								me.create_issue(comm_details);
+								me.create_issue(comm_details,frappe.get_route()[1]);
 							});
 						} else {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details);
+								me.make_a_call(comm_details,frappe.get_route()[1]);
 							});							
 							me.page.main.find("#new_lead").on("click", function() {
-								me.create_lead(comm_details);
+								me.create_lead(comm_details,frappe.get_route()[1]);
 							});
 							me.page.main.find("#new_customer").on("click", function() {
 								// me.create_customer(r.message);
 							});
 							me.page.main.find("#new_caller_issue").on("click", function() {
-								me.create_issue(comm_details);
+								me.create_issue(comm_details,frappe.get_route()[1]);
 							});						
 						}
 					}
@@ -120,7 +120,10 @@ frappe.CallCenterConsole = Class.extend({
 			}
 		});
 	},
-	make_a_call: function(comm_details){
+	make_a_call: function(comm_details,comm_name){
+		if(!comm_details){
+			console.log("Thamb jara")
+		}
 		frappe.call({
 			method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
 			args: {
@@ -138,11 +141,12 @@ frappe.CallCenterConsole = Class.extend({
 		});
 	},
 
-	create_lead: function(comm_details) {
+	create_lead: function(comm_details,comm_name) {
+		communication_docname = comm_details.communication_name || comm_name;
 		frappe.call({
 			method: "frappe.email.inbox.make_lead_from_communication",
 			args: {
-				"communication":comm_details.communication_name
+				"communication": communication_docname
 			},
 			freeze: true,
 			freeze_message: __("Making Lead.."),
@@ -159,11 +163,12 @@ frappe.CallCenterConsole = Class.extend({
 		
 	// 	frappe.set_route("Form", "Customer", new_customer.name);
 	// },	
-	create_issue: function(comm_details) {
+	create_issue: function(comm_details,comm_name) {
+		communication_docname = comm_details.communication_name || comm_name;
 		frappe.call({
 			method: "frappe.email.inbox.make_issue_from_communication",
 			args: {
-				"communication":comm_details.communication_name
+				"communication":communication_docname
 			},
 			freeze: true,
 			freeze_message: __("Making Issue.."),
@@ -173,8 +178,3 @@ frappe.CallCenterConsole = Class.extend({
 		})
 	}
 });
-
-// function render_template(r){
-// 	let telephony_console = `${r.toString()}`
-// 	return telephony_console;
-// }
