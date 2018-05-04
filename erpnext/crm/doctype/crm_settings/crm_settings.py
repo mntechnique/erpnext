@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe,json
 from frappe.model.document import Document
 
 class CRMSettings(Document):
@@ -104,16 +104,25 @@ def display_popup(caller_no, comm_details):
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
 
+@frappe.whitelist()
 def update_lead_and_make_contact(args):
-	# update lead
+	args = json.load(args)
+
+	# update lead name
+	lead = frappe.get_doc("Lead",args.get("lead_docname"))
+	lead.company_name = args.get("first_name") + args.get("last_name")
+	lead.save()
+	frappe.db.commit()
+
+	# autocreate contact
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
-		'first_name': args.get('first_name'),
-		'last_name': args.get('last_name'),
-		'mobile_no': args.get('mobile_no'),
+		'first_name': args.get("first_name"),
+		'last_name': args.get("last_name"),
+		'mobile_no': args.get("mobile_no"),
 		'links': [{
 			'link_doctype': "Lead",
-			'link_name': args.get('lead_docname')
+			'link_name': args.get("lead_docname")
 		}]
 	}).insert()
 
@@ -121,6 +130,7 @@ def update_lead_and_make_contact(args):
 
 @frappe.whitelist()
 def get_caller_info(caller_no):
+	# Fetches caller information from the number in the search bar
 	if caller_no and len(caller_no) > 13:
 		frappe.msgprint("Please enter a valid number")
 		return

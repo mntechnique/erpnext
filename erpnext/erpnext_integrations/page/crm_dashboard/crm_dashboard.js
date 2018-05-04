@@ -122,6 +122,7 @@ frappe.CallCenterConsole = Class.extend({
 		});
 	},
 	get_basic_details:function(comm_details,comm_name){
+		var me = this;
 		var d = new frappe.ui.Dialog({
 			title: __('Basic Details'),
 			fields: [
@@ -181,15 +182,15 @@ frappe.CallCenterConsole = Class.extend({
 			freeze_message: __("Making Lead.."),
 			callback: function(r) {
 				console.log("Lead made",r);
-				me.page.main.find("#new_lead").addClass(".hidden");
-				me.page.main.find("#linked_lead").removeClass(".hidden");
-				me.page.page.main.find("#new_lead")[0].innerHTML = r;
+				me.page.main.find("#new_lead").addClass("hidden");
+				me.page.main.find("#linked_lead").removeClass("hidden");
+				me.page.main.find("#linked_lead")[0].innerHTML = r.message;
 				console.log("ND",name_details);
 				args = {
-					first_name: name_details.first_name,
-					last_name: name_details.last_name,
-					lead_docname: r,
-					mobile_no: me.page.main.find(".txt-lookup").val().trim()
+					"first_name": name_details.first_name,
+					"last_name": name_details.last_name,
+					"lead_docname": r.message,
+					"mobile_no": me.page.main.find(".txt-lookup").val().trim()
 				}
 				me.update_lead_and_make_contact(args);
 
@@ -231,7 +232,7 @@ frappe.CallCenterConsole = Class.extend({
 				console.log("Issue created",r);
 				me.page.main.find("#new_caller_issue").addClass(".hidden");
 				me.page.main.find("#linked_issue").removeClass(".hidden");
-				me.page.page.main.find("#new_caller_issue")[0].innerHTML = r;
+				me.page.page.main.find("#new_caller_issue")[0].innerHTML = r.message;
 				// 
 			}
 		})
