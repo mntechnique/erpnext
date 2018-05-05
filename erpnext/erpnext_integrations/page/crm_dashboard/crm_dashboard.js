@@ -288,9 +288,9 @@ frappe.CallCenterConsole = Class.extend({
 				freeze_message: __("Making Issue.."),
 				callback: function(r) {
 					console.log("Issue created",r);
-					me.page.main.find("#new_caller_issue").addClass(".hidden");
-					me.page.main.find("#linked_issue").removeClass(".hidden");
-					me.page.page.main.find("#linked_issue")[0].innerHTML = r.message;
+					me.page.main.find("#new_caller_issue").addClass("hidden");
+					me.page.main.find("#linked_issue").removeClass("hidden");
+					me.page.main.find("#linked_issue")[0].innerHTML = r.message;
 				}
 			});
 		}	
