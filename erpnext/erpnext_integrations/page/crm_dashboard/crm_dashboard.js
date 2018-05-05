@@ -291,6 +291,7 @@ frappe.CallCenterConsole = Class.extend({
 				callback: function(r) {
 					console.log("Issue created",r);
 					me.page.main.find("#new_caller_issue").addClass("hidden");
+					me.page.main.find("#lead_issue").addClass("hidden");
 					me.page.main.find("#linked_issue").removeClass("hidden");
 					me.page.main.find("#linked_issue")[0].innerHTML = r.message;
 				}
