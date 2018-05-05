@@ -149,7 +149,7 @@ frappe.CallCenterConsole = Class.extend({
 			}
 		});
 	},
-	get_basic_details:function(comm_details){
+	get_basic_details:function(comm_details,resp){
 		var me = this;
 		var d = new frappe.ui.Dialog({
 			title: __('Basic Details'),

@@ -110,7 +110,7 @@ def update_lead_and_make_contact(args):
 
 	# update lead name
 	lead = frappe.get_doc("Lead",args.get("lead_docname"))
-	lead.company_name = args.get("first_name") + " " + args.get("last_name")
+	lead.lead_name = lead.company_name = args.get("first_name") + " " + args.get("last_name")
 	lead.save()
 	frappe.db.commit()
 
