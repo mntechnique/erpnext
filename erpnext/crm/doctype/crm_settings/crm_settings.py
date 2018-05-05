@@ -14,7 +14,7 @@ def make_popup(caller_no, comm_details):
 
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
-		
+
 		if(contact_doc.get_link_for('Customer')):
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
@@ -24,7 +24,11 @@ def make_popup(caller_no, comm_details):
 				"name": customer_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
-
+			popup_data["route_link"] = str(comm_details.get("communication_phone_no") + "/" +
+				comm_details.get("communication_name") + "/" +
+				comm_details.get("communication_exophone") +  "/" +
+				comm_details.get("communication_reference_doctype") + "/" +
+				comm_details.get("communication_reference_name"))
 			popup_html = render_popup(popup_data)
 			return popup_html
 
@@ -36,6 +40,11 @@ def make_popup(caller_no, comm_details):
 				"name": lead_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
+			popup_data["route_link"] = str(comm_details.get("communication_phone_no") + "/" +
+				comm_details.get("communication_name") + "/" +
+				comm_details.get("communication_exophone") +  "/" +
+				comm_details.get("communication_reference_doctype") + "/" +
+				comm_details.get("communication_reference_name"))
 			popup_html = render_popup(popup_data)
 			return popup_html
 		else:
@@ -164,11 +173,13 @@ def get_caller_info(caller_no):
 		return dashboard_data
 
 	else:
+		open_issues = frappe.get_all("Issue", filters = {"contact":caller_no}, fields=["*"])
+
 		dashboard_data = {
 			"title": "New Caller",
 			"number": caller_no,
 			"name": "Unknown",
 			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S'),
-			"issue_list":[]
+			"issue_list": open_issues			
 		}
 		return dashboard_data
