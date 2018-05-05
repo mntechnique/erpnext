@@ -177,14 +177,15 @@ frappe.CallCenterConsole = Class.extend({
 		d.show();
 	},
 
-	make_call: function(comm_details){
+	make_call: function(comm_details,resp){
 		if(!comm_details){
-			console.log("This is to be done");
+			console.log("Minor change is to be done");
+			// frappe.set_re_route('Form', doctype);
 		}
 		frappe.call({
 			method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
 			args: {
-				"To": comm_details.communication_phone_no,
+				"To": comm_details.communication_phone_no || resp.number,
 				"CallerId": comm_details.communication_exophone,
 				"reference_doctype": comm_details.communication_reference_doctype,
 				"reference_name": comm_details.communication_reference_name
@@ -203,9 +204,10 @@ frappe.CallCenterConsole = Class.extend({
 		if(!comm_details){
 			var new_lead = frappe.model.make_new_doc_and_get_name('Lead');
 			new_lead = locals["Lead"][new_lead];
-			new_lead.phone = resp.number;
-			new_lead.contact_number = resp.number;
-			new_lead.lead_name = resp.name;	
+			new_lead.organization_lead = 1;
+			// new_lead.phone = resp.number;
+			// new_lead.contact_number = resp.number;
+			new_lead.lead_name = new_lead.company_name = name_details.first_name + " " + name_details.last_name;
 			new_lead.status = "Lead";
 			
 			frappe.set_route("Form", "Lead", new_lead.name);
