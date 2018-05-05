@@ -15,8 +15,16 @@ frappe.pages['crm-dashboard'].on_page_load = function(wrapper) {
 
 frappe.pages['crm-dashboard'].refresh = function(wrapper) {
 	if (frappe.ccc && frappe.get_route()[1]) {
-		wrapper.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		frappe.ccc.get_info();
+		var comm_details = {
+			"communication_phone_no":frappe.get_route()[1],
+			"communication_name":frappe.get_route()[2],
+			"communication_exophone":frappe.get_route()[3],
+			"communication_reference_doctype":frappe.get_route()[4],
+			"communication_reference_name":frappe.get_route()[5]
+		}
+
+		wrapper.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
+		frappe.ccc.get_info(comm_details);
 	}
 }
 
@@ -28,15 +36,10 @@ frappe.CallCenterConsole = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		// me.page.add_inner_button(__("Search"), function() {
-		// 	console.log("Search");
-		// });
-		//console.log("Content", me.page)
+		// opts = {"doctype":"Issue"};
 
 		var input_html = '<div class="jumbotron"><div class="input-group"><input type="text" class="form-control txt-lookup" placeholder="Search for caller number..."> <span class="input-group-btn"> <button id="btn-lookup" class="btn btn-primary" type="button">Search!</button> </span> </div> </div><div class="clearfix"></div>'
 		me.page.main.append(input_html);
-
-		// var text = me.page.main.find(".txt-lookup");
 
 		me.page.main.on("click", "button[id='btn-lookup']", function() {
 			me.get_info();
@@ -48,15 +51,20 @@ frappe.CallCenterConsole = Class.extend({
 				me.get_info();
 			}
 		});
+	
+		// new frappe.views.ListView({
+		// 	doctype: "Issue",
+		// 	parent: me,
+		// });
 	},
 	get_info: function(comm_details) {
 		var me = this;
 		if(comm_details){
 			me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
 		}
-		else if(frappe.get_route()[1]){
-			me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		}
+		// else if(frappe.get_route()[1]){
+		// 	me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
+		// }
 
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
@@ -65,6 +73,7 @@ frappe.CallCenterConsole = Class.extend({
 				args: { "caller_no": text.val().trim() },
 				callback: function(r){
 					if(r) {
+						var resp = r.message;
 						me.page.main.find("#cc_console").remove("#cc_console");
 						console.log("R",r.message);
 
@@ -73,35 +82,54 @@ frappe.CallCenterConsole = Class.extend({
 
 						if (r.message.title == "Lead") {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details,frappe.get_route()[1]);
+								me.make_a_call(comm_details,resp);
 							});
+
 							me.page.main.find("#lead_to_customer").on("click", function() {
 								// me.create_customer(r.message);
 							});
+
+							// lead creation and re-route buttom for linked issue							
 							me.page.main.find("#lead_issue").on("click", function() {
-								me.create_issue(comm_details,frappe.get_route()[1]);
+								me.create_issue(comm_details,resp);
+							});
+							me.page.main.find("#linked_issue").on("click", function() {
+								frappe.set_route("Form", "Issue", me.page.main.find("#linked_issue")[0].innerHTML);
 							});
 						} else if(r.message.title == "Customer") {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details,frappe.get_route()[1]);
+								me.make_call(comm_details,resp);
 							});
+
+							// lead creation and re-route buttom for linked issue							
 							me.page.main.find("#customer_issue").on("click", function() {
-								me.create_issue(comm_details,frappe.get_route()[1]);
+								me.create_issue(comm_details,resp);
 							});
 						} else {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details,frappe.get_route()[1]);
-							});							
-							me.page.main.find("#new_lead").on("click", function() {
-								name_details = me.get_basic_details(comm_details,frappe.get_route()[1]);
-								
+								me.make_call(comm_details,resp);
 							});
+							
+							// lead creation and re-route buttom for linked lead
+							me.page.main.find("#new_lead").on("click", function() {
+								name_details = me.get_basic_details(comm_details,resp);
+							});
+							me.page.main.find("#linked_lead").on("click", function() {
+								frappe.set_route("Form", "Lead", me.page.main.find("#linked_lead")[0].innerHTML);
+							});
+
+							// lead creation and re-route buttom for linked customer
 							me.page.main.find("#new_customer").on("click", function() {
 								// me.create_customer(r.message);
 							});
+
+							// lead creation and re-route buttom for linked issue							
 							me.page.main.find("#new_caller_issue").on("click", function() {
-								me.create_issue(comm_details,frappe.get_route()[1]);
-							});						
+								me.create_issue(comm_details,resp);
+							});
+							me.page.main.find("#linked_issue").on("click", function() {
+								frappe.set_route("Form", "Issue", me.page.main.find("#linked_issue")[0].innerHTML);
+							});
 						}
 					}
 				}
@@ -121,7 +149,7 @@ frappe.CallCenterConsole = Class.extend({
 			}
 		});
 	},
-	get_basic_details:function(comm_details,comm_name){
+	get_basic_details:function(comm_details){
 		var me = this;
 		var d = new frappe.ui.Dialog({
 			title: __('Basic Details'),
@@ -141,7 +169,7 @@ frappe.CallCenterConsole = Class.extend({
 			],
 			primary_action: function() {
 				var name_details = d.get_values();
-				me.create_lead(comm_details,comm_name,name_details);
+				me.create_lead(comm_details,name_details,resp);
 				d.hide()
 			},
 			primary_action_label: __('Save')
@@ -149,9 +177,9 @@ frappe.CallCenterConsole = Class.extend({
 		d.show();
 	},
 
-	make_a_call: function(comm_details,comm_name){
+	make_call: function(comm_details){
 		if(!comm_details){
-			console.log("Thamb jara")
+			console.log("This is to be done");
 		}
 		frappe.call({
 			method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
@@ -170,33 +198,44 @@ frappe.CallCenterConsole = Class.extend({
 		});
 	},
 
-	create_lead: function(comm_details,comm_name,name_details) {
+	create_lead: function(comm_details,name_details,resp) {
 		var me = this;
-		communication_docname = comm_details.communication_name || comm_name;
-		frappe.call({
-			method: "frappe.email.inbox.make_lead_from_communication",
-			args: {
-				"communication": communication_docname
-			},
-			freeze: true,
-			freeze_message: __("Making Lead.."),
-			callback: function(r) {
-				console.log("Lead made",r);
-				me.page.main.find("#new_lead").addClass("hidden");
-				me.page.main.find("#linked_lead").removeClass("hidden");
-				me.page.main.find("#linked_lead")[0].innerHTML = r.message;
-				console.log("ND",name_details);
-				args = {
-					"first_name": name_details.first_name,
-					"last_name": name_details.last_name,
-					"lead_docname": r.message,
-					"mobile_no": me.page.main.find(".txt-lookup").val().trim()
+		if(!comm_details){
+			var new_lead = frappe.model.make_new_doc_and_get_name('Lead');
+			new_lead = locals["Lead"][new_lead];
+			new_lead.phone = resp.number;
+			new_lead.contact_number = resp.number;
+			new_lead.lead_name = resp.name;	
+			new_lead.status = "Lead";
+			
+			frappe.set_route("Form", "Lead", new_lead.name);
+		}
+		else{
+			frappe.call({
+				method: "frappe.email.inbox.make_lead_from_communication",
+				args: {
+					"communication": comm_details.communication_name
+				},
+				freeze: true,
+				freeze_message: __("Making Lead.."),
+				callback: function(r) {
+					console.log("Lead made",r);
+					me.page.main.find("#new_lead").addClass("hidden");
+					me.page.main.find("#linked_lead").removeClass("hidden");
+					me.page.main.find("#linked_lead")[0].innerHTML = r.message;
+					console.log("ND",name_details);
+					args = {
+						"first_name": name_details.first_name,
+						"last_name": name_details.last_name,
+						"lead_docname": r.message,
+						"mobile_no": me.page.main.find(".txt-lookup").val().trim()
+					}
+					me.update_lead_and_make_contact(args);
 				}
-				me.update_lead_and_make_contact(args);
-
-			}
-		});
+			});
+		}	
 	},
+
 	update_lead_and_make_contact: function(args) {
 		frappe.call({
 			method: "erpnext.crm.doctype.crm_settings.crm_settings.update_lead_and_make_contact",
@@ -204,11 +243,11 @@ frappe.CallCenterConsole = Class.extend({
 				"args": args
 			},
 			freeze: true,
-			freeze_message: __("Making Issue.."),
+			freeze_message: __("Making Contact.."),
 			callback: function(r) {
 				 
 			}
-		})
+		});
 	},
 
 	// create_customer: function(resp) {
@@ -218,23 +257,42 @@ frappe.CallCenterConsole = Class.extend({
 	// 	// new_customer.lead_name = resp.number;
 		
 	// 	frappe.set_route("Form", "Customer", new_customer.name);
-	// },	
-	create_issue: function(comm_details,comm_name) {
-		communication_docname = comm_details.communication_name || comm_name;
-		frappe.call({
-			method: "frappe.email.inbox.make_issue_from_communication",
-			args: {
-				"communication":communication_docname
-			},
-			freeze: true,
-			freeze_message: __("Making Issue.."),
-			callback: function(r) {
-				console.log("Issue created",r);
-				me.page.main.find("#new_caller_issue").addClass(".hidden");
-				me.page.main.find("#linked_issue").removeClass(".hidden");
-				me.page.page.main.find("#new_caller_issue")[0].innerHTML = r.message;
-				// 
+	// },
+
+	create_issue: function(comm_details,resp) {
+		var me =this;
+		if(!comm_details){
+			var new_issue = frappe.model.make_new_doc_and_get_name('Issue');
+			new_issue = locals["Issue"][new_issue];
+
+			if (resp.title == "Customer") {
+				console.log("Setting customer", resp.customer);
+				new_issue.subject = resp.name;
+				new_issue.customer = resp.customer;
+			} else if (resp.title == "Lead") {
+				new_issue.subject = resp.name;
+				new_issue.lead = resp.name;
+			} else {
+				new_issue.subject = resp.title + "-" + resp.number;
 			}
-		})
+
+			frappe.set_route("Form", "Issue", new_issue.name);
+		}
+		else{
+			frappe.call({
+				method: "frappe.email.inbox.make_issue_from_communication",
+				args: {
+					"communication": comm_details.communication_name
+				},
+				freeze: true,
+				freeze_message: __("Making Issue.."),
+				callback: function(r) {
+					console.log("Issue created",r);
+					me.page.main.find("#new_caller_issue").addClass(".hidden");
+					me.page.main.find("#linked_issue").removeClass(".hidden");
+					me.page.page.main.find("#linked_issue")[0].innerHTML = r.message;
+				}
+			});
+		}	
 	}
 });

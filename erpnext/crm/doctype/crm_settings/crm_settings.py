@@ -106,7 +106,7 @@ def display_popup(caller_no, comm_details):
 
 @frappe.whitelist()
 def update_lead_and_make_contact(args):
-	args = json.load(args)
+	args = json.loads(args)
 
 	# update lead name
 	lead = frappe.get_doc("Lead",args.get("lead_docname"))
