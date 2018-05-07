@@ -162,7 +162,7 @@ frappe.CallCenterConsole = Class.extend({
 		frappe.call({
 			method: "erpnext.crm.doctype.crm_settings.crm_settings.get_issue_list",
 			args: {
-				"args": me.page.main.find(".issue-lookup")
+				"args": me.page.main.find(".issue-lookup").val(),
 			},
 			freeze: true,
 			freeze_message: __("Fetching Issue.."),
