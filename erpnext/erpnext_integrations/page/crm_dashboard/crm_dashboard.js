@@ -38,17 +38,28 @@ frappe.CallCenterConsole = Class.extend({
 		var me = this;
 		// opts = {"doctype":"Issue"};
 
-		var input_html = '<div class="jumbotron"><div class="input-group"><input type="text" class="form-control txt-lookup" placeholder="Search for caller number..."> <span class="input-group-btn"> <button id="btn-lookup" class="btn btn-primary" type="button">Search!</button> </span> </div> </div><div class="clearfix"></div>'
+		var input_html = '<div class="jumbotron"><div class="input-group"><input type="text" class="form-control txt-lookup" placeholder="Search for caller number..." autofocus> <span class="input-group-btn"> <button id="btn-lookup" class="btn btn-primary" type="button">Search!</button> </span> </div> </div><div class="clearfix"></div>'
 		me.page.main.append(input_html);
 
+		// contact lookup
 		me.page.main.on("click", "button[id='btn-lookup']", function() {
 			me.get_info();
 		});
-
 		me.page.main.on("keypress", ".txt-lookup", function(ev) {
 			var keycode = (ev.keyCode ? ev.keyCode : ev.which);
 			if (keycode == '13') {
 				me.get_info();
+			}
+		});
+
+		// Issue lookup
+		me.page.main.on("click", "button[id='btn-issue-lookup']", function() {
+			me.get_issue_list();
+		});
+		me.page.main.on("keypress", ".issue-lookup", function(ev) {
+			var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+			if (keycode == '13') {
+				me.get_issue_list();
 			}
 		});
 	
@@ -62,9 +73,6 @@ frappe.CallCenterConsole = Class.extend({
 		if(comm_details){
 			me.page.wrapper.find('.txt-lookup').val(comm_details.communication_phone_no);
 		}
-		// else if(frappe.get_route()[1]){
-		// 	me.page.wrapper.find('.txt-lookup').val(frappe.get_route()[1]);
-		// }
 
 		var text = me.page.main.find(".txt-lookup");
 		if (text.val() && !isNaN(text.val())) {
@@ -148,6 +156,24 @@ frappe.CallCenterConsole = Class.extend({
 			frappe.show_alert("Please enter a valid number");
 		}
 	},
+
+	get_issue_list: function(){
+		frappe.call({
+			method: "erpnext.crm.doctype.crm_settings.crm_settings.get_issue_list",
+			args: {
+				"args": me.page.main.find(".issue-lookup");
+			},
+			freeze: true,
+			freeze_message: __("Fetching Issue.."),
+			callback: function(r) {
+				console.log("IL",r);
+				me.page.main.find("#issue-list").remove("#issue-list");
+				// me.page.main.find("#issue-list")='<li class="list-group-item"><div class="row"><div class="col-xs-12"><a href="/desk#Form/Issue/{{ info.issue_list[i].name }}">{{ info.issue_list[i].subject }}</a><button id="{{ info.issue_list[i].name }}" class="btn btn-xs link_communication pull-right"><i class="fa fa-link" aria-hidden="true"></i></button></div></div></li>'
+
+			}
+		});
+	},
+
 	setup_realtime: function(){
 		var me = this;
 		frappe.realtime.on('new_call', (comm_details) => {
@@ -319,10 +345,8 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Linking communication.."),
 			callback: function(r) {
-				console.log("LINK STATUS",r);	 
+				console.log("LINK STATUS",r);
 			}
 		});
-
-
 	}
 });

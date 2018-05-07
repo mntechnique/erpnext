@@ -63,7 +63,12 @@
 		</ul>
 	</div>
 	<div class="col-xs-8" style="padding-right:0px;">
-		<b> <h4>Issue List:</h4></b>
+		<div class="col-xs-4"><p><b>Issue List:</b></p></div>
+		<div class="col-xs-8">
+			<input type="text" class="form-control issue-lookup" placeholder="Search for issue...">
+			<button id="btn-issue-lookup" class="btn btn-xs"><i class="fa fa-search" aria-hidden="true"></i></button>
+		</div>
+
 		<ul class="list-group" id="issue-list">
 			{% if (info.issue_list.length == 0){ %}
 				<div class="row">
