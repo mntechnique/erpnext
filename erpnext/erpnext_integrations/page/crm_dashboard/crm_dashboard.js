@@ -169,8 +169,9 @@ frappe.CallCenterConsole = Class.extend({
 			callback: function(r) {
 				console.log("IL",r);
 				me.page.main.find("#issue-list").remove("#issue-list");
-				// me.page.main.find("#issue-list")='<li class="list-group-item"><div class="row"><div class="col-xs-12"><a href="/desk#Form/Issue/{{ info.issue_list[i].name }}">{{ info.issue_list[i].subject }}</a><button id="{{ info.issue_list[i].name }}" class="btn btn-xs link_communication pull-right"><i class="fa fa-link" aria-hidden="true"></i></button></div></div></li>'
-
+				for(i=0;i<=issue_list.length-1;i++){
+					me.page.main.find("#issue-list")='<li class="list-group-item"><div class="row"><div class="col-xs-12"><a href="/desk#Form/Issue/{{ issue_list[i].name }}">{{ issue_list[i].subject }}</a><button id="{{ issue_list[i].name }}" class="btn btn-xs link_communication pull-right"><i class="fa fa-link" aria-hidden="true"></i></button></div></div></li>'
+				}
 			}
 		});
 	},

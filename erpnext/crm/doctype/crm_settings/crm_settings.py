@@ -215,15 +215,7 @@ def get_caller_info(caller_no):
 		}
 		return dashboard_data
 
-
-
-
-
-
-
-
 @frappe.whitelist()
 def get_issue_list(args):
-	args = json.loads(args)
-	issue_list = frappe.get_all("Issue", fields=["name"], filters = {"name": ("like", "%{0}%")}).format(args)
+	issue_list = frappe.get_all("Issue", fields=["name"], filters = {"name": ("like", "%{0}%".format(args))})
 	return issue_list
