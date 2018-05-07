@@ -96,12 +96,17 @@ frappe.CallCenterConsole = Class.extend({
 							me.page.main.find("#linked_issue").on("click", function() {
 								frappe.set_route("Form", "Issue", me.page.main.find("#linked_issue")[0].innerHTML);
 							});
+
+							// link communication to an existing Issue
+							me.page.main.find(".link_communication").on("click", function() {
+								me.link_communication_to_issue(comm_details,this.id);
+							});
 						} else if(r.message.title == "Customer") {
 							me.page.main.find("#callback").on("click", function() {
 								me.make_call(comm_details,resp);
 							});
 
-							// lead creation and re-route buttom for linked issue							
+							// lead creation and re-route button for linked issue							
 							me.page.main.find("#customer_issue").on("click", function() {
 								me.create_issue(comm_details,resp);
 							});
@@ -129,6 +134,11 @@ frappe.CallCenterConsole = Class.extend({
 							});
 							me.page.main.find("#linked_issue").on("click", function() {
 								frappe.set_route("Form", "Issue", me.page.main.find("#linked_issue")[0].innerHTML);
+							});
+
+							// link communication to an existing Issue
+							me.page.main.find(".link_communication").on("click", function() {
+								me.link_communication_to_issue(comm_details,this.id);
 							});
 						}
 					}
@@ -247,7 +257,7 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Making Contact.."),
 			callback: function(r) {
-				 
+				frappe.msgprint(__("Contact and Lead created."))
 			}
 		});
 	},
@@ -297,5 +307,22 @@ frappe.CallCenterConsole = Class.extend({
 				}
 			});
 		}	
+	},
+
+	link_communication_to_issue(comm_details,issue_name){
+		frappe.call({
+			method: "erpnext.crm.doctype.crm_settings.crm_settings.link_communication_to_issue",
+			args: {
+				"comm_details": comm_details || "",
+				"issue_name": issue_name
+			},
+			freeze: true,
+			freeze_message: __("Linking communication.."),
+			callback: function(r) {
+				console.log("LINK STATUS",r);	 
+			}
+		});
+
+
 	}
 });

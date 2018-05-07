@@ -138,6 +138,38 @@ def update_lead_and_make_contact(args):
 	return contact
 
 @frappe.whitelist()
+def link_communication_to_issue(comm_details,issue_name):
+	comm_details = json.loads(comm_details)
+
+	if not comm_details:
+		# manual search
+		
+	else:
+		issue_doc = frappe.get_doc("Issue",issue_name)
+
+		# update and link communication to issue
+		comm = frappe.get_doc("Communication",comm_details.get(communication_name))
+		comm.reference_doctype = "Issue"
+		comm.reference_name = issue_name
+		comm.save()
+		frappe.db.commit()
+
+		if (comm_details.communication_phone_no != (frappe.get_doc("Contact",issue_doc.contact).phone or frappe.get_doc("Contact",issue_doc.contact).mobile_no))
+			# add the unknown/new contact to an already linked Lead on Issue
+			contact = frappe.get_doc({
+				'doctype': 'Contact',
+				'first_name': "",
+				'last_name': "",
+				'mobile_no': comm_details.communication_phone_no,
+				'links': [{
+					'link_doctype': "Lead",
+					'link_name': issue_doc.lead
+				}]
+			}).insert()
+
+			return contact.name
+
+@frappe.whitelist()
 def get_caller_info(caller_no):
 	# Fetches caller information from the number in the search bar
 	if caller_no and len(caller_no) > 13:
