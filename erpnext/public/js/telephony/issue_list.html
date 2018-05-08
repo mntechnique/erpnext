@@ -1,0 +1,31 @@
+<ul class="list-group" id="issue-list" style="margin-top: 10px;">
+	<li style="list-style-type: none;margin-bottom:10px;">
+		<div class="col-xs-4"><h4><b>Issue List</b></h4></div>
+		<div class="col-xs-8 input-group" style="padding-left:0px;padding-right:0px;">
+			<input type="text" class="form-control issue-lookup" placeholder="Search for issue...">
+			<span class="input-group-btn">
+				<button id="btn-issue-lookup" class="btn btn-md">
+					<i class="fa fa-search" aria-hidden="true"></i>
+				</button>
+            </span>
+		</div>
+	</li>
+	{% if (issue_list.length == 0){ %}
+		<div class="row">
+			<div class="col-xs-12">
+				No Issues linked to this number
+			</div>
+		</div>
+	{% } else { %}
+		{% for(var i=0;i<=issue_list.length - 1;i++){ %}
+			<li class="list-group-item">
+				<div class="row">
+					<div class="col-xs-12">
+						<a href="/desk#Form/Issue/{{ issue_list[i].name }}">{{ issue_list[i].subject }}</a>
+						<button id="{{ issue_list[i].name }}" class="btn btn-xs link_communication pull-right"><i class="fa fa-link" aria-hidden="true"></i></button>
+					</div>
+				</div>
+			</li>
+		{% } %}
+	{% } %}
+</ul>

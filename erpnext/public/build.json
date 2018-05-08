@@ -39,7 +39,8 @@
         "public/js/education/assessment_result_tool.html",
         "public/js/hub/hub_factory.js", 
         "public/js/integrations/call_popup.html",
-        "public/js/telephony/telephony_console.html"
+        "public/js/telephony/telephony_console.html",
+        "public/js/telephony/issue_list.html"
     ],
     "js/item-dashboard.min.js": [
         "stock/dashboard/item_dashboard.html",
