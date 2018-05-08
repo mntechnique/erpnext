@@ -87,6 +87,7 @@ frappe.CallCenterConsole = Class.extend({
 
 						content = frappe.render_template('telephony_console', {"info": r.message});
 						me.page.main.append(content);
+						$(".issue-container").html(frappe.render_template('issue_list', {"issue_list": r.message.issue_list}));
 
 						if (r.message.title == "Lead") {
 							me.page.main.find("#callback").on("click", function() {
@@ -168,10 +169,9 @@ frappe.CallCenterConsole = Class.extend({
 			freeze_message: __("Fetching Issue.."),
 			callback: function(r) {
 				console.log("IL",r);
-				me.page.main.find("#issue-list").remove("#issue-list");
-				for(i=0;i<=issue_list.length-1;i++){
-					me.page.main.find("#issue-list")='<li class="list-group-item"><div class="row"><div class="col-xs-12"><a href="/desk#Form/Issue/{{ issue_list[i].name }}">{{ issue_list[i].subject }}</a><button id="{{ issue_list[i].name }}" class="btn btn-xs link_communication pull-right"><i class="fa fa-link" aria-hidden="true"></i></button></div></div></li>'
-				}
+				issue_list = r.message;
+				$(".issue-container").empty();
+				$(".issue-container").html(frappe.render_template('issue_list', {"issue_list": issue_list || []}));
 			}
 		});
 	},

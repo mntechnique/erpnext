@@ -217,5 +217,5 @@ def get_caller_info(caller_no):
 
 @frappe.whitelist()
 def get_issue_list(args):
-	issue_list = frappe.get_all("Issue", fields=["name"], filters = {"name": ("like", "%{0}%".format(args))})
+	issue_list = frappe.get_all("Issue", fields=["name","subject"], filters = {"name": ("like", "%{0}%".format(args))})
 	return issue_list
