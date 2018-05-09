@@ -131,12 +131,16 @@ def capture_call_details(*args, **kwargs):
 		if args or kwargs:
 			content = args or kwargs
 
-			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
+			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid") or content.get("comm_doc")}, fields=["name"])
 			comm = frappe.get_doc("Communication",call[0].name)
-			comm.recording_url = content.get("RecordingUrl")
-			comm.content = "PCD" + str(content)
+			if(content.get("RecordingUrl")):
+				comm.recording_url = content.get("RecordingUrl")
+				frappe.publish_realtime('call_description', message=call[0].name, after_commit=False)
+			else:
+				comm.content = content.get(conversation)
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
+
 			return comm
 
 	except Exception as e:
@@ -174,7 +178,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 		data = {
 			'From': user_number,
 			'To': To,
-			'CallerId': CallerId,
+			'CallerId': CallerId or frappe.get_doc("Exotel Settings").exophone,
 			'StatusCallback':"http://159.65.150.239/api/method/erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
 		})
 
