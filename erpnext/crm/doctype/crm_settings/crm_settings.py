@@ -149,10 +149,10 @@ def link_communication_to_issue(comm_details,issue_name):
 		issue_doc = frappe.get_doc("Issue",issue_name)
 		
 		# update and link communication to issue
-		comm = frappe.get_doc("Communication",comm_details.get(communication_name))
+		comm = frappe.get_doc("Communication",comm_details.get("communication_name"))
 		comm.reference_doctype = "Issue"
 		comm.reference_name = issue_name
-		comm.save()
+		comm.save(ignore_permissions=True)
 		frappe.db.commit()
 		if (comm_details.get("communication_phone_no") != (frappe.get_doc("Contact",issue_doc.get("contact")).phone or frappe.get_doc("Contact",issue_doc.get("contact")).mobile_no)):
 			# add the unknown/new contact to an already linked Lead on Issue

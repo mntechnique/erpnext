@@ -131,13 +131,14 @@ def capture_call_details(*args, **kwargs):
 		if args or kwargs:
 			content = args or kwargs
 
-			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid") or content.get("comm_doc")}, fields=["name"])
-			comm = frappe.get_doc("Communication",call[0].name)
 			if(content.get("RecordingUrl")):
+				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
+				comm = frappe.get_doc("Communication",call[0].name)
 				comm.recording_url = content.get("RecordingUrl")
 				frappe.publish_realtime('call_description', message=call[0].name, after_commit=False)
 			else:
-				comm.content = content.get(conversation)
+				comm = frappe.get_doc("Communication",content.get("comm_doc"))
+				comm.content = content.get("conversation")
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 

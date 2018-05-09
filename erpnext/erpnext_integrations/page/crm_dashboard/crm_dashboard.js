@@ -201,11 +201,11 @@ frappe.CallCenterConsole = Class.extend({
 						},
 					],
 					primary_action: function() {
-						var call_description = d.get_values();
+						var data = d.get_values();
 						frappe.call({
 							method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details",
 							args: {
-								"conversation": call_description,
+								"conversation": data.call_description,
 								"comm_doc": comm_name
 							},
 							freeze: true,
