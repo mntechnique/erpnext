@@ -170,8 +170,8 @@ def link_communication_to_issue(comm_details,issue_name):
 					}]
 				}).insert()
 				return contact
-		except Exception as e:
-			frappe.log_error(message=frappe.get_traceback(), title="Error in linking")		
+	except Exception as e:
+		frappe.log_error(message=frappe.get_traceback(), title="Error in linking")		
 
 @frappe.whitelist()
 def get_caller_info(caller_no):
