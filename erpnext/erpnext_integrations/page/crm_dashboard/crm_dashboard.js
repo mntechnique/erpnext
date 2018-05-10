@@ -173,6 +173,20 @@ frappe.CallCenterConsole = Class.extend({
 				issue_list = r.message;
 				$(".issue-container").empty();
 				$(".issue-container").html(frappe.render_template('issue_list', {"issue_list": issue_list || []}));
+				
+				var comm_details = {
+					"communication_phone_no":frappe.get_route()[1],
+					"communication_name":frappe.get_route()[2],
+					"communication_exophone":frappe.get_route()[3],
+					"communication_reference_doctype":frappe.get_route()[4],
+					"communication_reference_name":frappe.get_route()[5]
+				}
+				// link communication to an existing Issue
+				me.page.main.find(".link_communication").on("click", function() {
+					console.log("comm_details",comm_details);
+					me.link_communication_to_issue(comm_details,this.id);
+				});
+
 			}
 		});
 	},
