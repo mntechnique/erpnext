@@ -154,19 +154,23 @@ def link_communication_to_issue(comm_details,issue_name):
 		comm.reference_name = issue_name
 		comm.save(ignore_permissions=True)
 		frappe.db.commit()
-		if (comm_details.get("communication_phone_no") != (frappe.get_doc("Contact",issue_doc.get("contact")).phone or frappe.get_doc("Contact",issue_doc.get("contact")).mobile_no)):
-			# add the unknown/new contact to an already linked Lead on Issue
-			contact = frappe.get_doc({
-				'doctype': 'Contact',
-				'first_name': "",
-				'last_name': "",
-				'mobile_no': comm_details.get("communication_phone_no"),
-				'links': [{
-					'link_doctype': "Lead",
-					'link_name': issue_doc.lead
-				}]
-			}).insert()
-			return contact
+		
+		try:
+			if (comm_details.get("communication_phone_no") != (frappe.get_doc("Contact",issue_doc.get("contact")).phone or frappe.get_doc("Contact",issue_doc.get("contact")).mobile_no)):
+				# add the unknown/new contact to an already linked Lead on Issue
+				contact = frappe.get_doc({
+					'doctype': 'Contact',
+					'first_name': "",
+					'last_name': "",
+					'mobile_no': comm_details.get("communication_phone_no"),
+					'links': [{
+						'link_doctype': "Lead",
+						'link_name': issue_doc.lead
+					}]
+				}).insert()
+				return contact
+		except Exception as e:
+			frappe.log_error(message=frappe.get_traceback(), title="Error in linking")		
 
 @frappe.whitelist()
 def get_caller_info(caller_no):
