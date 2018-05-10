@@ -147,6 +147,7 @@ frappe.CallCenterConsole = Class.extend({
 
 							// link communication to an existing Issue
 							me.page.main.find(".link_communication").on("click", function() {
+								console.log("comm_details",comm_details);
 								me.link_communication_to_issue(comm_details,this.id);
 							});
 						}

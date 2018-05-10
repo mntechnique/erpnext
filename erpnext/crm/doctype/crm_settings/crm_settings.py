@@ -139,24 +139,24 @@ def update_lead_and_make_contact(args):
 
 @frappe.whitelist()
 def link_communication_to_issue(comm_details,issue_name):
+	try:	
+		if not comm_details:
+			frappe.log_error(message=str(comm_details), title="Comm details nt found")
+			# manual search
+			return False
 
-	if not comm_details:
-		frappe.log_error(message=str(comm_details), title="Comm details nt found")
-		# manual search
-		return False
-
-	else:
-		comm_details = json.loads(comm_details)
-		issue_doc = frappe.get_doc("Issue",issue_name)
+		else:			
+			comm_details = json.loads(comm_details)
+			issue_doc = frappe.get_doc("Issue",issue_name)
+			
+			# update and link communication to issue
+			comm = frappe.get_doc("Communication",comm_details.get("communication_name"))
+			comm.reference_doctype = "Issue"
+			comm.reference_name = issue_name
+			comm.save(ignore_permissions=True)
+			frappe.db.commit()
 		
-		# update and link communication to issue
-		comm = frappe.get_doc("Communication",comm_details.get("communication_name"))
-		comm.reference_doctype = "Issue"
-		comm.reference_name = issue_name
-		comm.save(ignore_permissions=True)
-		frappe.db.commit()
 		
-		try:
 			if (comm_details.get("communication_phone_no") != (frappe.get_doc("Contact",issue_doc.get("contact")).phone or frappe.get_doc("Contact",issue_doc.get("contact")).mobile_no)):
 				# add the unknown/new contact to an already linked Lead on Issue
 				contact = frappe.get_doc({
