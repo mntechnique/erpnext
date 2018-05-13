@@ -147,7 +147,6 @@ frappe.CallCenterConsole = Class.extend({
 
 							// link communication to an existing Issue
 							me.page.main.find(".link_communication").on("click", function() {
-								console.log("comm_details",comm_details);
 								me.link_communication_to_issue(comm_details,this.id);
 							});
 						}
@@ -169,7 +168,7 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Fetching Issue.."),
 			callback: function(r) {
-				console.log("IL",r);
+				// console.log("IL",r);
 				issue_list = r.message;
 				$(".issue-container").empty();
 				$(".issue-container").html(frappe.render_template('issue_list', {"issue_list": issue_list || []}));
@@ -183,7 +182,7 @@ frappe.CallCenterConsole = Class.extend({
 				}
 				// link communication to an existing Issue
 				me.page.main.find(".link_communication").on("click", function() {
-					console.log("comm_details",comm_details);
+					// console.log("comm_details",comm_details);
 					me.link_communication_to_issue(comm_details,this.id);
 				});
 
@@ -195,7 +194,7 @@ frappe.CallCenterConsole = Class.extend({
 		var me = this;
 		frappe.realtime.on('new_call', (comm_details) => {
 			if(frappe.get_route()[0] == 'crm-dashboard') {
-				console.log("comm",comm_details);
+				// console.log("comm",comm_details);
 				me.get_info(comm_details);
 			} else {
 				frappe.utils.notify(__("Incoming call"));
@@ -204,7 +203,7 @@ frappe.CallCenterConsole = Class.extend({
 
 		frappe.realtime.on('call_description', (comm_name) => {
 			if(frappe.get_route()[0] == 'crm-dashboard') {
-				console.log("C-D",comm_name);
+				// console.log("C-D",comm_name);
 				var d = new frappe.ui.Dialog({
 					title: __('Add call description'),
 					fields: [
@@ -226,7 +225,7 @@ frappe.CallCenterConsole = Class.extend({
 							freeze: true,
 							freeze_message: __("Updating Call description.."),
 							callback: function(r) {
-								console.log("CD updated",r);
+								// console.log("CD updated",r);
 							}
 						});
 						d.hide()
@@ -266,19 +265,30 @@ frappe.CallCenterConsole = Class.extend({
 	},
 
 	make_call: function(comm_details,resp){
+		if(!comm_details){
+			var connect_to = resp.number
+			var exophone = ""
+			var rd = ""
+			var rn = ""			
+		}else{
+			var connect_to = comm_details.communication_phone_no
+			var exophone = comm_details.communication_exophone
+			var rd = comm_details.communication_reference_doctype
+			var rn = comm_details.communication_reference_name
+		}
 		frappe.call({
 			method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.handle_outgoing_call",
 			args: {
-				"To": comm_details.communication_phone_no || resp.number,
-				"CallerId": comm_details.communication_exophone || "",
-				"reference_doctype": comm_details.communication_reference_doctype,
-				"reference_name": comm_details.communication_reference_name
+				"To": connect_to,
+				"CallerId": exophone,
+				"reference_doctype": rd,
+				"reference_name": rn
 			},
 			freeze: true,
 			freeze_message: __("Calling.."),
 			callback: function(r) {
 				frappe.msgprint(__("Call Connected"))
-				console.log("Outbound calls communication",r);
+				// console.log("Outbound calls communication",r);
 			}
 		});
 	},
@@ -305,11 +315,11 @@ frappe.CallCenterConsole = Class.extend({
 				freeze: true,
 				freeze_message: __("Making Lead.."),
 				callback: function(r) {
-					console.log("Lead made",r);
+					// console.log("Lead made",r);
 					me.page.main.find("#new_lead").addClass("hidden");
 					me.page.main.find("#linked_lead").removeClass("hidden");
 					me.page.main.find("#linked_lead")[0].innerHTML = r.message;
-					console.log("ND",name_details);
+					// console.log("ND",name_details);
 					args = {
 						"first_name": name_details.first_name,
 						"last_name": name_details.last_name,
@@ -352,7 +362,7 @@ frappe.CallCenterConsole = Class.extend({
 			new_issue = locals["Issue"][new_issue];
 
 			if (resp.title == "Customer") {
-				console.log("Setting customer", resp.customer);
+				// console.log("Setting customer", resp.customer);
 				new_issue.subject = resp.name;
 				new_issue.customer = resp.customer;
 			} else if (resp.title == "Lead") {
@@ -373,7 +383,7 @@ frappe.CallCenterConsole = Class.extend({
 				freeze: true,
 				freeze_message: __("Making Issue.."),
 				callback: function(r) {
-					console.log("Issue created",r);
+					// console.log("Issue created",r);
 					me.page.main.find("#new_caller_issue").addClass("hidden");
 					me.page.main.find("#lead_issue").addClass("hidden");
 					me.page.main.find("#linked_issue").removeClass("hidden");
@@ -393,7 +403,7 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Linking communication.."),
 			callback: function(r) {
-				console.log("LINK STATUS",r);
+				// console.log("LINK STATUS",r);
 			}
 		});
 	}

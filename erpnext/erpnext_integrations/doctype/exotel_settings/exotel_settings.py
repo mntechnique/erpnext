@@ -172,7 +172,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 
 		user_number = frappe.get_doc("User",frappe.session.user).phone or frappe.get_doc("User",frappe.session.user).mobile_no
 		if not user_number:
-			return frappe.msgprint(_("User's contact number missing.Please verify and try again."))
+			return frappe.msgprint(_("User's contact number missing. Please verify and try again."))
 
 		response = requests.post('https://api.exotel.in/v1/Accounts/{sid}/Calls/connect.json'.format(sid=credentials.exotel_sid),
         auth = (credentials.exotel_sid,credentials.exotel_token),
