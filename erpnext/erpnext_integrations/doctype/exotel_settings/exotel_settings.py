@@ -117,7 +117,7 @@ def popup_details(*args, **kwargs):
 			}
 			if(comm.call_receiver):
 				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
-				frappe.publish_realtime('new_call', message, after_commit=False, user=users[0].name)
+				frappe.publish_realtime('new_call', message, user=users[0].name, after_commit=False)
 			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"), message)
 
@@ -138,7 +138,8 @@ def capture_call_details(*args, **kwargs):
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 				comm = frappe.get_doc("Communication",call[0].name)
 				comm.recording_url = content.get("RecordingUrl")
-				frappe.publish_realtime('call_description', message=call[0].name, after_commit=False)
+				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
+				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
 			elif(content.get("comm_doc")):
 				# Used to update call conversation in Communication
 				comm = frappe.get_doc("Communication",content.get("comm_doc"))
