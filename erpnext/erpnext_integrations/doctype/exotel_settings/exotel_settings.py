@@ -89,7 +89,7 @@ def handle_incoming_call(*args, **kwargs):
 				"communication_reference_name":comm.reference_name or ""
 			}
 
-			frappe.publish_realtime('new_call', message, after_commit=False)
+			# frappe.publish_realtime('new_call', message, after_commit=False)
 
 			return comm
 	except Exception as e:
@@ -115,7 +115,9 @@ def popup_details(*args, **kwargs):
 				"communication_reference_doctype":comm.reference_doctype or "",
 				"communication_reference_name":comm.reference_name or ""
 			}
-
+			if(comm.call_receiver):
+				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
+				frappe.publish_realtime('new_call', message, after_commit=False, user=users[0].name)
 			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"), message)
 
@@ -132,11 +134,13 @@ def capture_call_details(*args, **kwargs):
 			content = args or kwargs
 
 			if(content.get("RecordingUrl")):
+				# Used to update call recording in Communication
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 				comm = frappe.get_doc("Communication",call[0].name)
 				comm.recording_url = content.get("RecordingUrl")
 				frappe.publish_realtime('call_description', message=call[0].name, after_commit=False)
-			else:
+			elif(content.get("comm_doc")):
+				# Used to update call conversation in Communication
 				comm = frappe.get_doc("Communication",content.get("comm_doc"))
 				comm.content = content.get("conversation")
 			comm.save(ignore_permissions=True)
