@@ -48,7 +48,7 @@ def make_popup(caller_no, comm_details):
 			popup_html = render_popup(popup_data)
 			return popup_html
 		else:
-			has_issues = frappe.get_list("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"])
+			has_issues = frappe.get_list("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"], ignore_permissions=True)
 			if(len(has_issues)>0):
 				if(has_issues[0].customer):
 					customer_full_name = frappe.db.get_value("Customer", has_issues[0].customer, "customer_name")
@@ -211,12 +211,12 @@ def get_caller_info(caller_no):
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 			}
 
-		open_issues = frappe.get_all("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"])
+		open_issues = frappe.get_all("Issue", filters = {"contact":contact_doc.get("name")}, fields=["*"], ignore_permissions=True)
 		dashboard_data["issue_list"] = open_issues
 		return dashboard_data
 
 	else:
-		open_issues = frappe.get_all("Issue", filters = {"contact":caller_no}, fields=["*"])
+		open_issues = frappe.get_all("Issue", filters = {"contact":caller_no}, fields=["*"], ignore_permissions=True)
 
 		dashboard_data = {
 			"title": "New Caller",
