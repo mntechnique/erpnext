@@ -34,10 +34,10 @@ class ExotelSettings(Document):
 					break;
 
 			if create_custom_fields:
-				labels = ["Call Details","Exophone","SID","Recording URL"]
-				types = ["Section Break","Read Only","Read Only","Long Text"]
+				labels = ["Call Details","Exophone","SID","Recording URL","Call Receiver"]
+				types = ["Section Break","Read Only","Read Only","Long Text","Data"]
 
-				insert_after = ["field_request","call_details","exophone","sid"]
+				insert_after = ["field_request","call_details","exophone","sid","recording_url"]
 				for index,i in enumerate(zip(labels,types)):
 					custom = frappe.new_doc("Custom Field")
 					custom.dt = "Communication"
@@ -49,7 +49,7 @@ class ExotelSettings(Document):
 
 		elif not self.enable_integration:
 			# delete
-			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url"]
+			names = ["Communication-call_details","Communication-exophone","Communication-sid","Communication-recording_url","Communication-call_receiver"]
 			for name in names:
 				frappe.delete_doc("Custom Field",name)
 
@@ -68,6 +68,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.send_email = 0
 			comm.communication_medium = "Phone"
 			comm.phone_no = content.get("CallFrom")
+			comm.km_call_status = content.get("Status")
 			comm.comment_type = "Info"
 			comm.communication_type = "Communication"
 			comm.status = "Open"
@@ -105,6 +106,8 @@ def popup_details(*args, **kwargs):
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 			comm = frappe.get_doc("Communication",call[0].name)
 			comm.call_receiver = content.get("DialWhomNumber")
+			# km 
+			comm.km_call_status = content.get("Status")
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 			message = {
@@ -138,12 +141,16 @@ def capture_call_details(*args, **kwargs):
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 				comm = frappe.get_doc("Communication",call[0].name)
 				comm.recording_url = content.get("RecordingUrl")
+				# km
+				comm.km_call_status = content.get("Status")
 				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
 				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
 			elif(content.get("comm_doc")):
 				# Used to update call conversation in Communication
 				comm = frappe.get_doc("Communication",content.get("comm_doc"))
 				comm.content = content.get("conversation")
+				#  km
+				comm.km_call_status = content.get("Status")
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 
@@ -199,6 +206,8 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			comm.comment_type = "Info"
 			comm.communication_type = "Communication"
 			comm.status = "Open"
+			# km
+			comm.km_call_status = content.get("Status")
 			comm.sent_or_received = "Sent"
 			comm.content = "Outgoing Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime()) + "<br>" + str(content)
 			comm.communication_date = content.get("StartTime")
