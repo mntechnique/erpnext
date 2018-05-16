@@ -194,7 +194,6 @@ frappe.CallCenterConsole = Class.extend({
 		var me = this;
 		frappe.realtime.on('new_call', (comm_details) => {
 			if(frappe.get_route()[0] == 'crm-dashboard') {
-				// console.log("comm",comm_details);
 				me.get_info(comm_details);
 			} else {
 				frappe.utils.notify(__("Incoming call"));
@@ -202,38 +201,36 @@ frappe.CallCenterConsole = Class.extend({
 		});
 
 		frappe.realtime.on('call_description', (comm_name) => {
-			if(frappe.get_route()[0] == 'crm-dashboard') {
-				// console.log("C-D",comm_name);
-				var d = new frappe.ui.Dialog({
-					title: __('Add call description'),
-					fields: [
-						{
-							"label": "Call Conversation",
-							"fieldname": "call_description",
-							"fieldtype": "Small Text",
-							"reqd": 1
-						},
-					],
-					primary_action: function() {
-						var data = d.get_values();
-						frappe.call({
-							method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details",
-							args: {
-								"conversation": data.call_description,
-								"comm_doc": comm_name
-							},
-							freeze: true,
-							freeze_message: __("Updating Call description.."),
-							callback: function(r) {
-								// console.log("CD updated",r);
-							}
-						});
-						d.hide()
+			var d = new frappe.ui.Dialog({
+				title: __('Add call description'),
+				fields: [
+					{
+						"label": "Call Conversation",
+						"fieldname": "call_description",
+						"fieldtype": "Small Text",
+						"reqd": 1
 					},
-					primary_action_label: __('Save')
-				});
-				d.show();				
-			}
+				],
+				primary_action: function() {
+					var data = d.get_values();
+					frappe.call({
+						method: "erpnext.erpnext_integrations.doctype.exotel_settings.exotel_settings.capture_call_details",
+						args: {
+							"conversation": data.call_description,
+							"comm_doc": comm_name
+						},
+						freeze: true,
+						freeze_message: __("Updating Call description.."),
+						callback: function(r) {
+							// console.log("CD updated",r);
+						}
+					});
+					d.hide()
+				},
+				primary_action_label: __('Save')
+			});
+			d.show();
+			$(".modal-backdrop").unbind("click");
 		});
 	},
 	get_basic_details:function(comm_details,resp){
