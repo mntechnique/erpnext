@@ -141,9 +141,7 @@ def update_lead_and_make_contact(args):
 def link_communication_to_issue(comm_details,issue_name):
 	try:	
 		if not comm_details:
-			frappe.log_error(message=str(comm_details), title="Comm details nt found")
-			# manual search
-			return False
+			return frappe.msgprint(_("No communication available to link. Consider adding manual comments"))
 
 		else:			
 			comm_details = json.loads(comm_details)

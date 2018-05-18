@@ -80,17 +80,6 @@ def handle_incoming_call(*args, **kwargs):
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 
-			# message = {
-			# 	"communication_name":comm.name,
-			# 	"communication_phone_no":comm.phone_no,
-			# 	"call_receiver":"",
-			# 	"communication_exophone":comm.exophone,
-			# 	"communication_reference_doctype":comm.reference_doctype or "",
-			# 	"communication_reference_name":comm.reference_name or ""
-			# }
-
-			# frappe.publish_realtime('new_call', message, after_commit=False)
-
 			return comm
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")
@@ -133,30 +122,20 @@ def capture_call_details(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
-			response = requests.get('https://{exotel_sid}:{exotel_token}@api.exotel.com/v1/Accounts/mntechnique/Calls/{call_sid}.json'.format(exotel_sid = credentials.exotel_sid,exotel_token = credentials.exotel_token,call_sid = content.get("CallSid")))
 
 			if(content.get("RecordingUrl")):
 				# Used to update call recording in Communication
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 				comm = frappe.get_doc("Communication",call[0].name)
 				comm.recording_url = content.get("RecordingUrl")
-				# km
-				if response.status_code == 200:
-					ed = response.json()["Call"]
-					comm.km_call_status = ed.get("Status")
-					comm.km_call_duration = ed.get("Duration")
-					comm.km_calls_start_time = ed.get("StartTime")
-					comm.km_calls_end_time = ed.get("EndTime")
-
+				comm.save(ignore_permissions=True)
 				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
 				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
-			elif(content.get("comm_doc")):
+			if(content.get("comm_doc")):
 				# Used to update call conversation in Communication
 				comm = frappe.get_doc("Communication",content.get("comm_doc"))
 				comm.content = content.get("conversation")
-				# km
-				# comm.km_call_status = content.get("Status")
-			comm.save(ignore_permissions=True)
+				comm.save(ignore_permissions=True)
 			frappe.db.commit()
 
 			return comm
