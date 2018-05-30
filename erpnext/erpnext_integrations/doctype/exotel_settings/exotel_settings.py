@@ -67,7 +67,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.subject = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
 			comm.send_email = 0
 			comm.communication_medium = "Phone"
-			comm.phone_no = content.get("CallFrom")
+			comm.phone_no = content.get("CallFrom")[1:11]
 			comm.comment_type = "Info"
 			comm.communication_type = "Communication"
 			comm.status = "Open"
@@ -75,7 +75,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.content = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime()) + "<br>" + str(content)
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
-			comm.exophone = content.get("CallTo")
+			comm.exophone = content.get("CallTo")[1:11]
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
@@ -93,7 +93,7 @@ def popup_details(*args, **kwargs):
 
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 			frappe.db.sql("""update `tabCommunication`
-				set call_receiver=%s where name=%s""",(content.get("DialWhomNumber"), call[0].name))
+				set call_receiver=%s where name=%s""",(content.get("DialWhomNumber")[1:11], call[0].name))
 			comm = frappe.get_doc("Communication",call[0].name)
 			# comm.call_receiver = content.get("DialWhomNumber")
 			# comm.save(ignore_permissions=True)
@@ -130,20 +130,22 @@ def capture_call_details(*args, **kwargs):
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
 				frappe.db.sql("""update `tabCommunication`
 					set recording_url=%s where name=%s""",(content.get("RecordingUrl"), call[0].name))
+				frappe.db.commit()
 				# comm = frappe.get_doc("Communication",call[0].name)
 				# comm.recording_url = content.get("RecordingUrl")
 				# comm.save(ignore_permissions=True)
 			
 				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
 				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
+			
 			if(content.get("comm_doc")):
 				# Used to update call conversation in Communication
 				frappe.db.sql("""update `tabCommunication`
 					set content=%s where name=%s""",(content.get("conversation"), content.get("comm_doc")))
+				frappe.db.commit()
 				# comm = frappe.get_doc("Communication",content.get("comm_doc"))
 				# comm.content = content.get("conversation")
 				# comm.save(ignore_permissions=True)
-			# frappe.db.commit()
 
 			return comm
 
@@ -193,7 +195,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			comm.subject = "Outgoing Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
 			comm.send_email = 0
 			comm.communication_medium = "Phone"
-			comm.phone_no = content.get("To")
+			comm.phone_no = content.get("To")[1:11]
 			comm.comment_type = "Info"
 			comm.communication_type = "Communication"
 			comm.status = "Open"
