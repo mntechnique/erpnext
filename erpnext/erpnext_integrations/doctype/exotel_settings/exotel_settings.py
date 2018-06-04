@@ -97,7 +97,7 @@ def popup_details(*args, **kwargs):
 			comm = frappe.get_doc("Communication",call[0].name)
 			# comm.call_receiver = content.get("DialWhomNumber")
 			# comm.save(ignore_permissions=True)
-			# frappe.db.commit()
+			frappe.db.commit()
 			message = {
 				"communication_name":comm.name,
 				"communication_phone_no":comm.phone_no,
