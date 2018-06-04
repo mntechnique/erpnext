@@ -127,7 +127,7 @@ def capture_call_details(*args, **kwargs):
 
 			if(content.get("RecordingUrl")):
 				# Used to update call recording in Communication
-				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
+				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["*"])
 				frappe.db.sql("""update `tabCommunication`
 					set recording_url=%s where name=%s""",(content.get("RecordingUrl"), call[0].name))
 				frappe.db.commit()
@@ -135,10 +135,11 @@ def capture_call_details(*args, **kwargs):
 				# comm.recording_url = content.get("RecordingUrl")
 				# comm.save(ignore_permissions=True)
 			
-				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
+				users = frappe.get_all("User", or_filters={"phone":call[0].call_receiver, "mobile_no":call[0].call_receiver}, fields=["name"])
 				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
-			
-			if(content.get("comm_doc")):
+				return comm
+
+			elif(content.get("comm_doc")):
 				# Used to update call conversation in Communication
 				frappe.db.sql("""update `tabCommunication`
 					set content=%s where name=%s""",(content.get("conversation"), content.get("comm_doc")))
@@ -147,7 +148,7 @@ def capture_call_details(*args, **kwargs):
 				# comm.content = content.get("conversation")
 				# comm.save(ignore_permissions=True)
 
-			return comm
+				return comm
 
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
