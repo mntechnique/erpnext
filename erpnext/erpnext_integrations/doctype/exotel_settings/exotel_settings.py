@@ -92,11 +92,11 @@ def popup_details(*args, **kwargs):
 			content = args or kwargs
 
 			call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
-			frappe.db.sql("""update `tabCommunication`
-				set call_receiver=%s where name=%s""",(content.get("DialWhomNumber")[1:11], call[0].name))
+			# frappe.db.sql("""update `tabCommunication`
+			# 	set call_receiver=%s where name=%s""",(content.get("DialWhomNumber")[1:11], call[0].name))
 			comm = frappe.get_doc("Communication",call[0].name)
-			# comm.call_receiver = content.get("DialWhomNumber")
-			# comm.save(ignore_permissions=True)
+			comm.call_receiver = content.get("DialWhomNumber")
+			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 			message = {
 				"communication_name":comm.name,
@@ -128,25 +128,25 @@ def capture_call_details(*args, **kwargs):
 			if(content.get("RecordingUrl")):
 				# Used to update call recording in Communication
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["*"])
-				frappe.db.sql("""update `tabCommunication`
-					set recording_url=%s where name=%s""",(content.get("RecordingUrl"), call[0].name))
+				# frappe.db.sql("""update `tabCommunication`
+				# 	set recording_url=%s where name=%s""",(content.get("RecordingUrl"), call[0].name))
+				comm = frappe.get_doc("Communication",call[0].name)
+				comm.recording_url = content.get("RecordingUrl")
+				comm.save(ignore_permissions=True)
 				frappe.db.commit()
-				# comm = frappe.get_doc("Communication",call[0].name)
-				# comm.recording_url = content.get("RecordingUrl")
-				# comm.save(ignore_permissions=True)
 			
-				users = frappe.get_all("User", or_filters={"phone":call[0].call_receiver, "mobile_no":call[0].call_receiver}, fields=["name"])
+				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
 				frappe.publish_realtime('call_description', message=call[0].name,  user=users[0].name, after_commit=False)
 				return comm
 
 			elif(content.get("comm_doc")):
 				# Used to update call conversation in Communication
-				frappe.db.sql("""update `tabCommunication`
-					set content=%s where name=%s""",(content.get("conversation"), content.get("comm_doc")))
+				# frappe.db.sql("""update `tabCommunication`
+				# 	set content=%s where name=%s""",(content.get("conversation"), content.get("comm_doc")))
+				comm = frappe.get_doc("Communication",content.get("comm_doc"))
+				comm.content = content.get("conversation")
+				comm.save(ignore_permissions=True)
 				frappe.db.commit()
-				# comm = frappe.get_doc("Communication",content.get("comm_doc"))
-				# comm.content = content.get("conversation")
-				# comm.save(ignore_permissions=True)
 
 				return comm
 
