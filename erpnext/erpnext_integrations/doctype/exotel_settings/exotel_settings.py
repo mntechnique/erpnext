@@ -95,7 +95,7 @@ def popup_details(*args, **kwargs):
 			# frappe.db.sql("""update `tabCommunication`
 			# 	set call_receiver=%s where name=%s""",(content.get("DialWhomNumber")[1:11], call[0].name))
 			comm = frappe.get_doc("Communication",call[0].name)
-			comm.call_receiver = content.get("DialWhomNumber")
+			comm.call_receiver = content.get("DialWhomNumber")[1:11]
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
 			message = {
