@@ -110,7 +110,7 @@ def popup_details(*args, **kwargs):
 				users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
 				frappe.publish_realtime('new_call', message, user=users[0].name, after_commit=False)
 			if(frappe.get_doc("CRM Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"), message)
+				display_popup(content.get("CallFrom")[1:11], message)
 
 			return comm
 
