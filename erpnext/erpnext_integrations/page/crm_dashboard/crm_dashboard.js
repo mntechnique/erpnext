@@ -83,7 +83,7 @@ frappe.CallCenterConsole = Class.extend({
 					if(r) {
 						var resp = r.message;
 						me.page.main.find("#cc_console").remove("#cc_console");
-						console.log("R",r.message);
+						// console.log("R",r.message);
 
 						content = frappe.render_template('telephony_console', {"info": r.message});
 						me.page.main.append(content);
@@ -284,7 +284,7 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Calling.."),
 			callback: function(r) {
-				frappe.msgprint(__("Call Connected"))
+				frappe.msgprint(__("Connecting the call. Please wait for a moment"))
 				// console.log("Outbound calls communication",r);
 			}
 		});
