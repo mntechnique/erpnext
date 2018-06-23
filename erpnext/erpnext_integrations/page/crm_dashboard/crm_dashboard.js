@@ -91,7 +91,7 @@ frappe.CallCenterConsole = Class.extend({
 
 						if (r.message.title == "Lead") {
 							me.page.main.find("#callback").on("click", function() {
-								me.make_a_call(comm_details,resp);
+								me.make_call(comm_details,resp);
 							});
 
 							me.page.main.find("#lead_to_customer").on("click", function() {
