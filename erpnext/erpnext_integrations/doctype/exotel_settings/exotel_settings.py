@@ -212,18 +212,18 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			frappe.db.commit()
 
 			# New and last thing
-			# message = {
-			# 	"communication_name":comm.name,
-			# 	"communication_phone_no":comm.phone_no,
-			# 	"call_receiver":user_number,
-			# 	# need it ?
-			# 	# "communication_exophone":comm.exophone,
-			# 	# "communication_reference_doctype":comm.reference_doctype or "",
-			# 	# "communication_reference_name":comm.reference_name or ""
-			# }
-			# # if(comm.call_receiver):
-			# 	# users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
-			# frappe.publish_realtime('new_call', message, user=frappe.session.user, after_commit=False)
+			message = {
+				"communication_name":comm.name,
+				"communication_phone_no":comm.phone_no,
+				# "call_receiver":user_number,
+				# need it ?
+				"communication_exophone":frappe.get_doc("Exotel Settings").exophone,
+				"communication_reference_doctype":"",
+				"communication_reference_name":""
+			}
+			# if(comm.call_receiver):
+				# users = frappe.get_all("User", or_filters={"phone":comm.call_receiver, "mobile_no":comm.call_receiver}, fields=["name"])
+			frappe.publish_realtime('new_call', message, user=frappe.session.user, after_commit=False)
 
 			return comm
 		else:

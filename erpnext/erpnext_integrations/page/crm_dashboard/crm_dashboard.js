@@ -193,6 +193,7 @@ frappe.CallCenterConsole = Class.extend({
 	setup_realtime: function(){
 		var me = this;
 		frappe.realtime.on('new_call', (comm_details) => {
+			console.log("TEST",typeof(comm_details),comm_details);
 			if(frappe.get_route()[0] == 'crm-dashboard') {
 				me.get_info(comm_details);
 			} else {
