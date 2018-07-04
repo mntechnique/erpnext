@@ -53,6 +53,7 @@ frappe.CallCenterConsole = Class.extend({
 		});
 
 		// Issue lookup
+		// hint
 		me.page.main.on("click", "button[id='btn-issue-lookup']", function() {
 			me.get_issue_list();
 		});
@@ -158,7 +159,7 @@ frappe.CallCenterConsole = Class.extend({
 		}
 	},
 
-	get_issue_list: function(){
+	get_issue_list: function(comm_details){
 		var me = this;
 		frappe.call({
 			method: "erpnext.crm.doctype.crm_settings.crm_settings.get_issue_list",
@@ -168,24 +169,24 @@ frappe.CallCenterConsole = Class.extend({
 			freeze: true,
 			freeze_message: __("Fetching Issue.."),
 			callback: function(r) {
-				// console.log("IL",r);
 				issue_list = r.message;
 				$(".issue-container").empty();
 				$(".issue-container").html(frappe.render_template('issue_list', {"issue_list": issue_list || []}));
 				
-				var comm_details = {
-					"communication_phone_no":frappe.get_route()[1],
-					"communication_name":frappe.get_route()[2],
-					"communication_exophone":frappe.get_route()[3],
-					"communication_reference_doctype":frappe.get_route()[4],
-					"communication_reference_name":frappe.get_route()[5]
+				if(!comm_details){
+					var comm_details = {
+						"communication_phone_no":frappe.get_route()[1],
+						"communication_name":frappe.get_route()[2],
+						"communication_exophone":frappe.get_route()[3],
+						"communication_reference_doctype":frappe.get_route()[4],
+						"communication_reference_name":frappe.get_route()[5]
+					}
 				}
+
 				// link communication to an existing Issue
 				me.page.main.find(".link_communication").on("click", function() {
-					// console.log("comm_details",comm_details);
 					me.link_communication_to_issue(comm_details,this.id);
 				});
-
 			}
 		});
 	},
