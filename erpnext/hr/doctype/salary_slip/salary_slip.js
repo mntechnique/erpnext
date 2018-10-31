@@ -67,8 +67,44 @@ frappe.ui.form.on("Salary Slip", {
 			frm.set_value('letter_head', company.default_letter_head);
 		}
 	},
+	
 
 	refresh: function(frm) {
+		if (!frm.doc._islocal && frm.doc.docstatus === 1){
+			frm.add_custom_button(__("Journal Entry"),()=>{
+				// window.open('#Form/Journal%20Entry/ACC-JV-2018-00001');
+				var payment_je = frappe.model.make_new_doc_and_get_name('Journal Entry');
+				payment_je = locals['Journal Entry'][payment_je];
+				payment_je.voucher_type = 'Journal Entry';
+				
+				// payment_je.posting_date = [
+				// 	{
+				// 		"posting_date_type":"Posting Date",
+				// 		"posting_date":frm.doc.posting_date
+				// 	}
+				// ]
+				
+				
+				// payment_je.company = [
+				// 	{
+				// 		"company_type":"Salary Slip"
+				// 		"company" : frm.doc.salary_slip
+				// 	}
+				// ]
+				
+				
+				payment_je.accounts = [
+					{ 
+						"party_type": "Employee", 
+						"party": frm.doc.employee,
+						"account_type": "EARNING & DEDUCTION",
+						"account": frm.doc.earnings
+					},
+					
+				]
+				frappe.set_route('Form', 'Journal Entry', payment_je.name);
+			});
+		}
 		frm.trigger("toggle_fields")
 		frm.trigger("toggle_reqd_fields")
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "is_tax_applicable",
@@ -256,3 +292,4 @@ var total_work_hours = function(frm, dt, dn) {
 		calculate_net_pay(frm.doc, dt, dn);
 	});
 }
+
